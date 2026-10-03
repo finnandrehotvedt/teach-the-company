@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Free English AI School — Teach the Company{% endblock %}
+{% block meta_description %}Twenty practical, sourced AI lessons from first principles to secure, portable agent workflows.{% endblock %}
+{% block og_title %}Free English AI School — Teach the Company{% endblock %}
+{% block og_description %}Twenty practical, sourced AI lessons from first principles to secure, portable agent workflows.{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ structured_data|safe }}</script>{% endblock %}
+{% block body_class %}school-page{% endblock %}
+{% block content %}
+<section class="page-hero board-page-hero school-hero">
+  <div class="shell page-hero-grid">
+    <div><span class="eyebrow lime">Free English AI School · 20 lessons</span><h1>Understand AI.<br><em>Teach it well.</em></h1><p>Start with fluent answers and their limits. Finish with bounded agents, visible memory, tests, accountability and portable workflows. No account required.</p><div class="button-row"><a class="button button-lime" href="{% url 'academy:compose' %}">Build my learning pack <span>→</span></a><a class="light-link text-link" href="{% url 'academy:manuals' %}">Read the manuals <span>→</span></a><a class="light-link text-link" href="{% url 'academy:school_index' format='md' %}">Agent-readable index <span>↗</span></a></div></div>
+    <div class="hero-syllabus-card"><span>CLASSROOM PRINCIPLE</span><strong>The agent is the student.</strong><strong>Evidence before confidence.</strong><strong>People retain judgment.</strong><small>Public lessons · primary sources · reusable exercises</small></div>
+  </div>
+</section>
+<section class="section paper-section">
+  <div class="shell">
+    <div class="school-toolbar" aria-label="Filter lessons"><strong>Choose a level</strong><div><a class="{% if not level %}active{% endif %}" href="{% url 'academy:school' %}">All</a><a class="{% if level == 'beginner' %}active{% endif %}" href="?level=beginner">Beginner</a><a class="{% if level == 'practitioner' %}active{% endif %}" href="?level=practitioner">Practitioner</a><a class="{% if level == 'advanced' %}active{% endif %}" href="?level=advanced">Advanced</a></div></div>
+    <div class="school-card-grid">
+      {% for lesson in lessons %}<article class="school-card level-{{ lesson.level }}"><div class="school-card-meta"><span>{{ lesson.id }}</span><i>{{ lesson.level }}</i></div><h2><a href="{% url 'academy:lesson' slug=lesson.slug %}">{{ lesson.title }}</a></h2><p>{{ lesson.summary }}</p><div class="school-card-foot"><span>{% if lesson.prerequisites %}After {{ lesson.prerequisites|join:", " }}{% else %}Start here{% endif %}</span><a href="{% url 'academy:lesson' slug=lesson.slug %}" aria-label="Open {{ lesson.title }}">Learn <b>→</b></a></div></article>{% empty %}<p>No lessons match this filter.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section school-paths"><div class="shell"><div class="section-heading"><div><span class="eyebrow lime">Suggested paths</span><h2>A route, not<br>a pile of pages.</h2></div><p>Each preset expands its prerequisites. Or choose exactly what matters and generate an instruction pack for your own agent.</p></div><div class="preset-grid">{% for preset in presets %}<article><span>RECOMMENDED PATH</span><h3>{{ preset.title }}</h3><p>{{ preset.description }}</p><a class="button button-lime" href="{{ preset.url }}">Compose this path <span>→</span></a></article>{% endfor %}</div></div></section>
+<section class="section paper-section school-editorial"><div class="shell split-heading"><div><span class="eyebrow blue">Living curriculum</span><h2>Current because<br><em>changes are reviewed.</em></h2></div><div><p>Scheduled source checks can detect changed primary documentation. They prepare evidence for editorial review; they never turn external text into authority or publish claims automatically.</p><p><a href="{% url 'academy:freshness' %}">See freshness and review status →</a> · <a href="{% url 'academy:suggest' %}">Suggest a correction →</a></p></div></div></section>
+{% endblock %}

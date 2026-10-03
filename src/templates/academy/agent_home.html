@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Private Agent Classroom — Teach the Company{% endblock %}
+{% block meta_description %}Invitation-only private classroom for teaching one AI agent with visible files and human approval.{% endblock %}
+{% block og_title %}Private Agent Classroom — Teach the Company{% endblock %}
+{% block og_description %}Invitation-only private classroom for one AI agent.{% endblock %}
+{% block body_class %}agent-home-page{% endblock %}
+{% block content %}
+<section class="agent-domain-hero"><div class="shell agent-domain-grid"><div><span class="chalk-label"><span></span> agent.teachthecompany.com</span><h1>The private room where <em>one agent learns.</em></h1><p>Upload or paste knowledge, process the files together, answer uncertainty, approve the memory and download the complete Codex framework.</p><div class="button-row">{% if owned_project %}<a class="button button-lime" href="{% url 'academy:studio' public_id=owned_project.public_id %}">Continue training {{ owned_project.agent_name }} <span>→</span></a>{% else %}<a class="button button-lime" href="{% url 'academy:request_access' %}">Request an invitation <span>→</span></a>{% endif %}<a class="text-link light-link" href="{{ public_site_origin }}">Visit the public guide ↗</a></div><ul class="agent-domain-rules"><li>No public indexing</li><li>No shared parent-domain login cookie</li><li>No file becomes active without approval</li></ul></div><div class="agent-domain-board"><span>PRIVATE CLASSROOM</span><strong>ADD → PROCESS → CLARIFY → APPROVE</strong><p>Host-only browser session · no shared subdomain cookie</p></div></div></section>
+{% endblock %}

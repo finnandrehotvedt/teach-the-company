@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Public AI Agent Manuals — Teach the Company{% endblock %}
+{% block meta_description %}Versioned public manuals for learning AI, teaching one agent, reviewing its files, bounding permissions and running a portable classroom.{% endblock %}
+{% block og_title %}Public AI Agent Manuals — Teach the Company{% endblock %}
+{% block og_description %}Five practical manuals covering all twenty school subjects, safe agent files, review, permissions, freshness and self-hosting.{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ structured_data|safe }}</script>{% endblock %}
+{% block body_class %}manuals-page{% endblock %}
+{% block content %}
+<section class="page-hero board-page-hero manuals-hero">
+  <div class="shell page-hero-grid">
+    <div><span class="eyebrow lime">Public manuals · {{ manuals|length }} stable guides</span><h1>Use the method.<br><em>Inspect the history.</em></h1><p>From first AI concepts to a portable private classroom: practical, versioned instructions with visible boundaries and no account required.</p><div class="button-row"><a class="button button-lime" href="{% url 'academy:manual_index' format='md' %}">Markdown index <span>↗</span></a><a class="light-link text-link" href="{% url 'academy:manual_index' format='json' %}">JSON index <span>↗</span></a></div></div>
+    <div class="hero-syllabus-card"><span>PUBLICATION CONTRACT</span><strong>{{ covered_lesson_count }} of 20 lessons mapped.</strong><strong>Human-reviewed versions.</strong><strong>Private infrastructure excluded.</strong><small>HTML · Markdown · JSON</small></div>
+  </div>
+</section>
+<section class="section paper-section">
+  <div class="shell">
+    <div class="section-heading"><div><span class="eyebrow blue">Five working manuals</span><h2>Practice over<br><em>mystique.</em></h2></div><p>Each manual maps to stable lesson IDs, includes reusable checks, and states what it cannot authorize.</p></div>
+    <div class="manual-card-grid">
+      {% for manual in manuals %}<article class="manual-card"><div class="school-card-meta"><span>MANUAL {{ forloop.counter|stringformat:'02d' }}</span><i>v{{ manual.version }}</i></div><h2><a href="{% url 'academy:manual' slug=manual.slug %}">{{ manual.title }}</a></h2><p>{{ manual.summary }}</p><div class="manual-lessons">{% for lesson_id in manual.lesson_ids %}<span>{{ lesson_id }}</span>{% endfor %}</div><a class="manual-open" href="{% url 'academy:manual' slug=manual.slug %}">Open manual <b>→</b></a></article>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section manual-source-band">
+  <div class="shell split-heading"><div><span class="eyebrow lime">Authorship and source trail</span><h2>Named work.<br><em>Clear boundaries.</em></h2></div><div><p><strong>Authored and directed by Finn Andre Hotvedt.</strong> Developed with assistance from ChatGPT and Codex by OpenAI. Manual versions are published on this site as HTML, Markdown and JSON.</p><p><a rel="external noopener" href="{{ repository_url }}">View the dedicated Teach manuals repository on GitLab ↗</a></p><p class="fine-print">This repository preserves the manuals and their real Git history. The complete Apache-2.0 application and Docker source is linked from the self-host page.</p></div></div>
+</section>
+<section class="section paper-section">
+  <div class="shell"><div class="section-heading compact-heading"><div><span class="eyebrow blue">Complete subject map</span><h2>All twenty lessons,<br>one visible route.</h2></div><p>Use the school for the full lesson, sources and exercise. Use a manual when you want the operational workflow.</p></div><ol class="manual-lesson-map">{% for lesson in lessons %}<li><a href="{% url 'academy:lesson' slug=lesson.slug %}"><span>{{ lesson.id }}</span><strong>{{ lesson.title }}</strong><i>{{ lesson.level }}</i></a></li>{% endfor %}</ol></div>
+</section>
+{% endblock %}

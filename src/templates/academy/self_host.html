@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Self-host with Docker — Teach the Company{% endblock %}
+{% block body_class %}self-host-page{% endblock %}
+{% block content %}
+<section class="page-hero self-host-hero"><div class="shell page-hero-grid"><div><span class="eyebrow lime">Complete self-hosted framework</span><h1>The training center.<br><em>On your server.</em></h1><p>Docker is the private classroom shell. You own the database while training, then download ordinary files that can continue without this application.</p></div><div class="repo-seal"><span>DOCKER</span><strong>1</strong><small>TRAINING<br>CENTER</small></div></div></section>
+<section class="section paper-section"><div class="shell self-host-grid">
+  <div><span class="eyebrow blue">Open-source Docker base</span><h2>Run the complete training center in your own company.</h2><p class="section-lead">All application, Docker, migration, test, model-adapter and synthetic security-lab source is public under Apache-2.0. Clone it without an invitation, inspect every layer and operate the classroom on infrastructure you control.</p>
+    <div class="button-row"><a class="button button-blue" rel="external noopener" href="{{ source_repository_url }}">Clone from GitLab <span>↗</span></a><a class="text-link" rel="external noopener" href="{{ github_source_repository_url }}">Mirror on GitHub <span>↗</span></a><a class="text-link" rel="external noopener" href="{{ manuals_repository_url }}">Public manuals <span>↗</span></a></div>
+    <div class="command-board"><code>python3 scripts/init_env.py</code><code>docker compose up -d --build</code><code>open http://127.0.0.1:18574</code></div>
+    <p class="command-note">The environment generator creates private random secrets and never prints them. Normal stop/start retains the database and private-file volume. The open repository is the complete self-hosting product; private production data and credentials are never source code.</p>
+    <p class="command-note"><strong>A complete first release was built in a few days.</strong> Use it as an inspectable reference for transparent agent training or start your own service. One agent can learn from documents, links, examples, procedures and corrections from almost any field, while you keep questions, revisions and approval visible. The school and source will keep growing. DNS and DNSSEC are only needed when you publish it on a public domain—not for local Docker use.</p>
+  </div>
+  <div class="self-host-features">
+    <article><span>01</span><div><strong>One agent by default</strong><p>No company administration or multi-agent complexity.</p></div></article>
+    <article><span>02</span><div><strong>Training as files</strong><p><code>AGENTS.md</code>, YAML rules, cognitive memory, knowledge, corrections and outputs.</p></div></article>
+    <article><span>03</span><div><strong>Bring the model</strong><p>Use evidence-only mode, an OpenAI-compatible API endpoint or a local model service.</p></div></article>
+    <article><span>04</span><div><strong>Human approval</strong><p>Proposed files do not become active until approved.</p></div></article>
+    <article><span>05</span><div><strong>Hosted when preferred</strong><p>Companies that do not want to operate Docker can request an invitation to the managed service.</p></div></article>
+  </div>
+</div></section>
+<section class="section taught-section"><div class="shell"><div class="section-heading compact-heading"><span class="eyebrow lime">Portable Codex ZIP</span><h2>The files remain useful without the UI.</h2><p>The web interface makes training approachable. Download the underlying Markdown, YAML, originals and history, then unpack them at the root of a Codex project.</p></div><div class="repo-board wide-repo-board"><div><span>●</span><strong>AGENTS.md</strong><i>Codex instructions</i></div><div><span>├</span><strong>rules/training-rules.yaml</strong><i>structured boundaries</i></div><div><span>├</span><strong>memory/teacher-notes/</strong><i>cognitive memory</i></div><div><span>├</span><strong>knowledge/</strong><i>documents and links</i></div><div><span>├</span><strong>corrections/</strong><i>durable YAML lessons</i></div><div><span>└</span><strong>_training/</strong><i>questions and history</i></div></div></div></section>
+{% endblock %}

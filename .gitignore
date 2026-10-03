@@ -1,0 +1,12 @@
+.env
+.venv/
+node_modules/
+__pycache__/
+*.py[cod]
+*.sqlite3
+.pytest_cache/
+staticfiles/
+backups/
+evidence/
+evidence/runtime/*.log
+evidence/chalk/agent-files-local-*

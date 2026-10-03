@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Day {{ lesson.day }}: {{ lesson.title }} — Teach the Company{% endblock %}
+{% block body_class %}lesson-page{% endblock %}
+{% block content %}
+<section class="lesson-board-header">
+  <div class="shell lesson-header-grid">
+    <div class="lesson-index"><span>DAY</span><strong>{{ lesson.day|stringformat:"02d" }}</strong><small>OF 07</small></div>
+    <div><span class="eyebrow lime">{{ lesson.verb }} · {{ project.agent_name }}</span><h1>{{ lesson.title }}</h1><p>{{ lesson.summary }}</p></div>
+    <a class="back-to-desk" href="{% url 'academy:studio' public_id=project.public_id %}">← Course desk</a>
+  </div>
+</section>
+
+<section class="section paper-section lesson-workspace">
+  <div class="narrow-shell lesson-layout">
+    <article class="lesson-reading">
+      <span class="margin-note">LESSON</span>
+      <h2>The idea</h2>
+      <p class="lesson-lead">{{ lesson.lesson }}</p>
+      <div class="chalk-example"><span>Board example</span><h3>{{ lesson.example_title }}</h3><p>{{ lesson.example_response }}</p></div>
+      <div class="assignment-brief"><span>YOUR ASSIGNMENT</span><h3>{{ lesson.artifact }}</h3><p>{{ lesson.prompt }}</p></div>
+    </article>
+
+    <form method="post" class="workbook-form" novalidate>
+      {% csrf_token %}
+      <div class="workbook-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="workbook-heading"><span>PRIVATE WORKBOOK · DAY {{ lesson.day }}</span><strong>{% if is_complete %}Revise your answer{% else %}Complete the assignment{% endif %}</strong></div>
+      {% for field in form %}
+        {% if field.name != 'safe_to_share' %}
+        <div class="field {% if field.errors %}has-error{% endif %}">{{ field.label_tag }}{% if field.name == 'response' %}<div class="field-counter" id="workbook-count">0 / 3000</div>{% endif %}{{ field }}{{ field.errors }}</div>
+        {% endif %}
+      {% endfor %}
+      <div class="privacy-check workbook-share {% if form.safe_to_share.errors %}has-error{% endif %}">{{ form.safe_to_share }}<label for="{{ form.safe_to_share.id_for_label }}"><strong>{{ form.safe_to_share.label }}</strong><span>{{ form.safe_to_share.help_text }}</span></label>{{ form.safe_to_share.errors }}</div>
+      <button class="button button-blue form-submit" type="submit">Save lesson {{ lesson.day }} <span>✓</span></button>
+      <p class="save-note">You can return and revise this entry while this browser session remains available.</p>
+    </form>
+  </div>
+</section>
+{% endblock %}

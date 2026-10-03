@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Suggestion received — Teach the Company{% endblock %}
+{% block meta_description %}Your suggestion has entered private editorial review.{% endblock %}
+{% block content %}<section class="page-hero board-page-hero"><div class="narrow-shell"><span class="eyebrow lime">Received for review</span><h1>Thank you.<br><em>A person decides next.</em></h1><p>Your suggestion is private and has status <strong>pending editorial review</strong>. It will not appear publicly or trigger automatic email.</p>{% if receipt %}<p class="suggestion-receipt">Receipt: {{ receipt }}</p>{% endif %}<div class="button-row"><a class="button button-lime" href="{% url 'academy:school' %}">Return to the school <span>→</span></a></div></div></section>{% endblock %}

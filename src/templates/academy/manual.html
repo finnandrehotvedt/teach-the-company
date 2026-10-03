@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ manual.title }} — Teach the Company Manual{% endblock %}
+{% block meta_description %}{{ manual.summary }}{% endblock %}
+{% block og_title %}{{ manual.title }} — Teach the Company Manual{% endblock %}
+{% block og_description %}{{ manual.summary }}{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ structured_data|safe }}</script>{% endblock %}
+{% block body_class %}manual-page{% endblock %}
+{% block content %}
+<section class="lesson-board-header manual-board-header"><div class="shell school-lesson-head"><div class="lesson-index"><span>MANUAL</span><strong>{{ manual.version }}</strong><small>public</small></div><div><a class="light-link" href="{% url 'academy:manuals' %}">← Public manuals</a><h1>{{ manual.title }}</h1><p>{{ manual.summary }}</p></div><div class="lesson-version"><span>LAST REVIEWED {{ manual.reviewed_on }}</span><strong>Finn Andre Hotvedt</strong><a href="{% url 'academy:manual_format' slug=manual.slug format='md' %}">Markdown ↗</a><a href="{% url 'academy:manual_format' slug=manual.slug format='json' %}">JSON ↗</a></div></div></section>
+<article class="section paper-section"><div class="narrow-shell lesson-article manual-article">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'academy:home' %}">Home</a><span>›</span><a href="{% url 'academy:manuals' %}">Manuals</a><span>›</span><span>{{ manual.title }}</span></nav>
+  <section class="answer-first"><span>WHO THIS IS FOR</span><h2>{{ manual.audience }}</h2><p>{{ manual.summary }}</p></section>
+  {% for section in manual.sections %}<section class="manual-section"><h2>{{ section.title }}</h2>{% for paragraph in section.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}{% if section.checklist %}<ul class="manual-checklist">{% for item in section.checklist %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}{% if section.copyable %}<div class="copy-block"><div><span>COPYABLE MATERIAL</span><button type="button" data-copy-target="manual-copy-{{ forloop.counter }}">Copy</button></div><pre id="manual-copy-{{ forloop.counter }}">{{ section.copyable }}</pre></div>{% endif %}</section>{% endfor %}
+  <section class="manual-related"><h2>Related school lessons</h2><div>{% for lesson in lessons %}<a href="{% url 'academy:lesson' slug=lesson.slug %}"><small>{{ lesson.id }}</small><strong>{{ lesson.title }}</strong><span>→</span></a>{% endfor %}</div></section>
+  <aside class="dependency-note manual-provenance"><strong>Authorship and version trail</strong><p>Authored and directed by Finn Andre Hotvedt. {{ manual.assistance }}</p><p><a rel="external noopener" href="{{ repository_url }}">Dedicated public manuals repository on GitLab ↗</a></p><p>This repository preserves the manuals and their real Git history. The complete Apache-2.0 application and Docker source is linked from the self-host page.</p></aside>
+  <section class="next-lessons"><span>NEXT STEP</span><a href="{% url 'academy:compose' %}"><small>COMPOSE</small><strong>Turn relevant lessons into an agent pack</strong><b>→</b></a><a href="{% url 'academy:manuals' %}"><small>INDEX</small><strong>Choose another manual</strong><b>→</b></a></section>
+</div></article>
+{% endblock %}

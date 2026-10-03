@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#171c36"/>
+  <rect x="710" y="84" width="390" height="420" rx="10" fill="#16443d" stroke="#dcff70" stroke-width="5" transform="rotate(2 905 294)"/>
+  <path d="M760 210 C850 145 970 245 1042 170" fill="none" stroke="#fffdf7" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+  <text x="760" y="290" fill="#dcff70" font-family="monospace" font-size="32" font-weight="700">TEACH → TEST</text>
+  <text x="760" y="340" fill="#fffdf7" font-family="monospace" font-size="32" font-weight="700">→ APPROVE</text>
+  <text x="90" y="115" fill="#dcff70" font-family="monospace" font-size="22" font-weight="700" letter-spacing="4">ONE AGENT · VISIBLE MEMORY</text>
+  <text x="90" y="250" fill="#fffdf7" font-family="Georgia,serif" font-size="76">Teach one agent.</text>
+  <text x="90" y="340" fill="#fffdf7" font-family="Georgia,serif" font-size="76">Inspect everything.</text>
+  <text x="90" y="445" fill="#b8def8" font-family="sans-serif" font-size="28">Versioned files · human approval · portable for Codex</text>
+  <text x="90" y="540" fill="#dcff70" font-family="sans-serif" font-size="25" font-weight="700">teachthecompany.com</text>
+</svg>

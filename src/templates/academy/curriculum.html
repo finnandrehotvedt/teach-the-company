@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}How the agent learns — Teach the Company{% endblock %}
+{% block body_class %}curriculum-page{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="shell page-hero-grid"><div><span class="eyebrow lime">The agent-file method</span><h1>No course.<br><em>One visible loop.</em></h1><p>Add material, process the files, clarify uncertainty and turn the result into portable cognitive memory.</p></div><div class="rules-poster"><span>THE SIMPLE RULE</span><strong>The agent uses approved files—not forgotten chat.</strong><i>ADD · PROCESS · ANSWER · APPROVE · EXPORT</i></div></div></section>
+<section class="section paper-section"><div class="shell"><div class="workflow-steps">
+  <article><span>01</span><div><small>TEACH</small><h2>Add a source.</h2><p>Upload a document, paste a public link, write an example, demonstrate a procedure or record a correction.</p></div></article>
+  <article><span>02</span><div><small>PROCESS</small><h2>Inspect all new files.</h2><p>You choose when processing starts. The agent compares the material and turns genuine uncertainties into visible questions.</p></div></article>
+  <article><span>03</span><div><small>CLARIFY</small><h2>Use quick replies or explain.</h2><p>Binary questions offer Yes and No. Every question also accepts a teacher explanation that becomes durable memory.</p></div></article>
+  <article><span>04</span><div><small>APPROVE</small><h2>Control active knowledge.</h2><p>A proposed file receives a path, checksum and revision. The agent cannot use it for work until you activate it.</p></div></article>
+  <article><span>05</span><div><small>EXPORT</small><h2>Move it into Codex.</h2><p>Download one ZIP containing <code>AGENTS.md</code>, YAML rules, cognitive memory, files, originals, questions and history.</p></div></article>
+</div></div></section>
+<section class="section access-band"><div class="shell access-band-grid"><div><span class="eyebrow coral">See it before using it</span><h2>Open a fabricated learning history.</h2><p>The public agents reveal sources, corrections, tests and outputs without using real company data.</p></div><div class="access-actions"><a class="button button-coral" href="{% url 'academy:demos' %}">Explore demo agents <span>→</span></a></div></div></section>
+{% endblock %}

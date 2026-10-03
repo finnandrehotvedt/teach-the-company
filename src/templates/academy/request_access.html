@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Request private access — Teach the Company{% endblock %}
+{% block body_class %}form-page{% endblock %}
+{% block content %}
+<section class="page-hero light-page-hero"><div class="narrow-shell compact-hero"><span class="eyebrow blue">Invite-only pilot</span><h1>Request one<br><em>private agent.</em></h1><p>We are inviting a small number of people while the agent-file workflow is tested. There is no open hosted registration yet.</p></div></section>
+<section class="section paper-section"><div class="narrow-shell form-layout">
+  <form method="post" class="course-form" novalidate>{% csrf_token %}{{ form.website }}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-chapter"><span>01</span><strong>Tell us what you would teach</strong></div>
+    {% for field in form %}{% if field.name != 'website' %}<div class="field {% if field.errors %}has-error{% endif %}">{{ field.label_tag }}{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}</div>{% endif %}{% endfor %}
+    <button class="button button-dark form-submit" type="submit">Request an invitation <span>→</span></button>
+  </form>
+  <aside class="form-aside"><div class="teacher-card"><span>What access includes</span><h2>One agent. One private file history.</h2><p>Teach with documents, links, YAML corrections and examples. Ask tasks, inspect output files and approve revisions.</p></div><p class="privacy-note-small"><strong>No automatic mailing.</strong> This form stores the request privately for manual review.</p></aside>
+</div></section>
+{% endblock %}

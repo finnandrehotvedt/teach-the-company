@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Practice test — {{ project.agent_name }}{% endblock %}
+{% block body_class %}preview-page{% endblock %}
+{% block content %}
+<section class="page-hero board-page-hero practice-hero">
+  <div class="shell page-hero-grid">
+    <div><span class="chalk-label"><span></span> Private practice room</span><h1>Test what<br><em>actually stuck.</em></h1><p>{{ project.agent_name }} may use every entry in your private workbook here. Nothing on this page is public.</p></div>
+    <div class="practice-score"><span>COURSE PROGRESS</span><strong>{{ project.completed_count }}<i>/7</i></strong><small>{% if project.completed_count == 7 %}Ready for review{% else %}Keep teaching{% endif %}</small></div>
+  </div>
+</section>
+
+<section class="section paper-section test-section">
+  <div class="shell test-layout">
+    <div>
+      <div class="desk-title"><span>Practice test</span><h2>Try a situation you did not write into the workbook.</h2><p>The transparent preview looks for a taught method, an approval boundary, or an honest gap.</p></div>
+      <form method="post" class="challenge-form" novalidate>
+        {% csrf_token %}{{ form.website }}
+        <div class="field {% if form.prompt.errors %}has-error{% endif %}">{{ form.prompt.label_tag }}{{ form.prompt }}<small>{{ form.prompt.help_text }}</small>{{ form.prompt.errors }}</div>
+        <button class="button button-blue" type="submit">Run the practice test <span>→</span></button>
+      </form>
+      {% include "academy/_result.html" %}
+    </div>
+    <aside class="evidence-board">
+      <div class="evidence-board-header"><span>WORKBOOK EVIDENCE</span><strong>{{ project.completed_count }}/7</strong></div>
+      {% for module, entry in module_rows %}
+      <div class="evidence-row {% if entry %}available{% endif %}"><span>{{ module.day|stringformat:"02d" }}</span><div><strong>{{ module.title }}</strong><small>{% if entry %}{{ entry.title }}{% else %}Not taught yet{% endif %}</small></div>{% if entry %}<i>✓</i>{% endif %}</div>
+      {% endfor %}
+      <p>Private preview may use all entries. Public challenges can use only reviewed entries marked safe to share.</p>
+      <a class="text-link" href="{% url 'academy:studio' public_id=project.public_id %}">← Return to course desk</a>
+    </aside>
+  </div>
+</section>
+{% endblock %}

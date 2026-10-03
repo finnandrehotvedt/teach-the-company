@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+backups
+evidence
+.cognitive-memory
+*.md
+compose.yaml
+scripts/backup.sh
+scripts/browser_acceptance.js
+scripts/init_env.py
+scripts/restore.sh
+src/**/__pycache__
+src/**/*.pyc
+src/*.sqlite3

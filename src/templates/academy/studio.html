@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ project.agent_name }} — private agent classroom{% endblock %}
+{% block body_class %}studio-page agent-studio-page{% endblock %}
+{% block content %}
+<section class="studio-header">
+  <div class="shell studio-heading agent-studio-heading">
+    <div><span class="eyebrow lime">Training mode · no task assigned</span><h1>{{ project.agent_name }}</h1><p>Upload knowledge, process the files, and answer only the uncertainties that matter.</p></div>
+    <div class="agent-health-card"><span>{% if agent_connected %}LOCAL AI CONNECTED{% else %}EVIDENCE MODE{% endif %}</span><strong>{{ project.source_count }} files</strong><small>{{ project.open_question_count }} open questions · {{ project.artifact_count }} test outputs</small></div>
+  </div>
+</section>
+
+<section class="section studio-body">
+  <div class="shell agent-workspace-grid">
+    <div class="agent-main-column">
+      <section class="workspace-panel question-panel" id="agent-questions">
+        <div class="panel-heading">
+          <div><span class="eyebrow coral">Agent asks the teacher</span><h2>Process first. Clarify second.</h2></div>
+          <p>The agent inspects all newly added files together. Binary uncertainties get quick Yes/No replies; you can always explain instead.</p>
+        </div>
+        <div class="process-bar">
+          <div><strong>{{ unprocessed_count }} unprocessed file{{ unprocessed_count|pluralize }}</strong><span>Uploaded material stays visible and proposed until you approve it.</span></div>
+          <form method="post" action="{% url 'academy:process_training' public_id=project.public_id %}" data-agent-process>{% csrf_token %}<button class="button button-coral" type="submit"><span data-process-label>Process files →</span></button><small class="process-wait" data-process-wait hidden>The private agent is reading every new file together. A connected model can take a minute.</small></form>
+        </div>
+        <div class="question-list">
+          {% for question in open_questions %}
+          <article class="question-card">
+            <div class="question-card-top"><span>{{ question.get_answer_kind_display }}</span>{% if question.source %}<a href="{% url 'academy:source_view' public_id=project.public_id source_id=question.source.public_id %}">{{ question.source.logical_path }}</a>{% else %}<i>Classroom setup</i>{% endif %}</div>
+            <h3>{{ question.prompt }}</h3><p>{{ question.detail }}</p>
+            {% if question.answer_kind == 'yes_no' %}
+            <div class="quick-replies">
+              {% for reply in question.quick_replies %}<form method="post" action="{% url 'academy:answer_training' public_id=project.public_id question_id=question.public_id %}">{% csrf_token %}<input type="hidden" name="answer" value="{{ reply }}"><button class="quick-reply" type="submit">{{ reply }}</button></form>{% endfor %}
+            </div>
+            {% endif %}
+            <form class="explanation-form" method="post" action="{% url 'academy:answer_training' public_id=project.public_id question_id=question.public_id %}">{% csrf_token %}<label for="answer-{{ question.public_id }}">Explain or answer in your own words</label><textarea id="answer-{{ question.public_id }}" name="answer" rows="3" maxlength="3000" placeholder="Add context, an exception, or your own answer…" required></textarea><button class="mini-action approve-action" type="submit">Save to memory</button></form>
+          </article>
+          {% empty %}<div class="empty-classroom"><strong>No open uncertainties.</strong><p>Add material and press “Process files” when you want the agent to inspect it.</p></div>{% endfor %}
+        </div>
+        {% if answered_questions %}<details class="answered-drawer"><summary>View recent teacher answers</summary><div>{% for question in answered_questions %}<article><strong>{{ question.prompt }}</strong><p>{{ question.answer_text }}</p></article>{% endfor %}</div></details>{% endif %}
+      </section>
+
+      <section class="workspace-panel" id="file-tree">
+        <div class="panel-heading"><div><span class="eyebrow blue">All agent files</span><h2>Open and inspect every memory.</h2></div><p><strong>Active</strong> files may guide the agent. Proposed and retired files remain visible for review and export.</p></div>
+        <div class="agent-file-list">
+          {% for source in sources %}
+          <article class="agent-file-row">
+            <div class="file-icon">{% if source.logical_path == 'AGENTS.md' %}A{% elif source.kind == 'correction' %}±{% elif source.kind == 'test' %}?{% else %}F{% endif %}</div>
+            <div class="file-main"><small>{{ source.kind|upper }} · {{ source.byte_size|filesizeformat }}</small><strong>{{ source.logical_path }}</strong><span>{{ source.title }}</span></div>
+            <div class="file-version"><span class="status-pill status-{{ source.status }}">{{ source.get_status_display }}</span><small>v{{ source.revision_number }} · {{ source.revisions.count }} revision{{ source.revisions.count|pluralize }}</small></div>
+            <div class="file-actions">
+              <a class="mini-action" href="{% url 'academy:source_view' public_id=project.public_id source_id=source.public_id %}">Open</a>
+              <a class="mini-action" href="{% url 'academy:source_download' public_id=project.public_id source_id=source.public_id %}">Download</a>
+              {% if source.uploaded_file %}<a class="mini-action" href="{% url 'academy:source_original_download' public_id=project.public_id source_id=source.public_id %}">Original</a>{% endif %}
+              {% if source.status == 'proposed' %}<form method="post" action="{% url 'academy:source_action' public_id=project.public_id source_id=source.public_id %}">{% csrf_token %}<input type="hidden" name="action" value="approve"><button class="mini-action approve-action" type="submit">Approve</button></form>{% endif %}
+              {% if source.status == 'active' and source.logical_path != 'AGENTS.md' %}<form method="post" action="{% url 'academy:source_action' public_id=project.public_id source_id=source.public_id %}">{% csrf_token %}<input type="hidden" name="action" value="retire"><button class="mini-action" type="submit">Retire</button></form>{% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="workspace-panel teach-panel" id="teach-agent">
+        <div class="panel-heading"><div><span class="eyebrow coral">Add material</span><h2>Upload, paste, or link.</h2></div><p>Add several items before processing if they belong together. Files do not become active until you approve them.</p></div>
+        <form method="post" enctype="multipart/form-data" action="{% url 'academy:teach_agent' public_id=project.public_id %}" class="course-form agent-file-form" novalidate>
+          {% csrf_token %}{{ source_form.website }}
+          {% if source_form.non_field_errors %}<div class="form-errors">{{ source_form.non_field_errors }}</div>{% endif %}
+          <div class="field-row">
+            <div class="field {% if source_form.kind.errors %}has-error{% endif %}">{{ source_form.kind.label_tag }}{{ source_form.kind }}{{ source_form.kind.errors }}</div>
+            <div class="field {% if source_form.title.errors %}has-error{% endif %}">{{ source_form.title.label_tag }}{{ source_form.title }}<small>{{ source_form.title.help_text }}</small>{{ source_form.title.errors }}</div>
+          </div>
+          <div class="field upload-field {% if source_form.uploaded_file.errors %}has-error{% endif %}"><label>Document</label><label class="upload-button">{{ source_form.uploaded_file }}<span>Upload document</span></label><small data-upload-name>TXT, Markdown, YAML, CSV, JSON or PDF · maximum 5 MB</small>{{ source_form.uploaded_file.errors }}</div>
+          <div class="field {% if source_form.source_url.errors %}has-error{% endif %}">{{ source_form.source_url.label_tag }}{{ source_form.source_url }}<small>{{ source_form.source_url.help_text }}</small>{{ source_form.source_url.errors }}</div>
+          <div class="field {% if source_form.content_text.errors %}has-error{% endif %}">{{ source_form.content_text.label_tag }}{{ source_form.content_text }}<small>{{ source_form.content_text.help_text }}</small>{{ source_form.content_text.errors }}</div>
+          <button class="button button-dark" type="submit">Add to classroom <span>→</span></button>
+        </form>
+      </section>
+
+      <section class="workspace-panel agent-desk-panel" id="agent-desk">
+        <div class="panel-heading"><div><span class="eyebrow lime">Test the training</span><h2>Ask, inspect, approve.</h2></div><p>This is optional. Every test answer becomes a visible Markdown draft and never publishes or sends itself.</p></div>
+        <form method="post" action="{% url 'academy:ask_agent' public_id=project.public_id %}" class="challenge-form agent-task-form" novalidate>
+          {% csrf_token %}{{ question_form.website }}
+          <div class="field {% if question_form.prompt.errors %}has-error{% endif %}">{{ question_form.prompt.label_tag }}{{ question_form.prompt }}{{ question_form.prompt.errors }}</div>
+          <button class="button button-lime" type="submit">Test the agent <span>→</span></button>
+        </form>
+        <div class="artifact-list">
+          {% for artifact in artifacts %}
+          <article class="artifact-card"><div class="artifact-card-top"><span class="status-pill status-{{ artifact.status }}">{{ artifact.get_status_display }}</span><small>{{ artifact.logical_path }} · v{{ artifact.revision_number }}</small></div><h3>{{ artifact.title }}</h3><pre>{{ artifact.content }}</pre>{% if artifact.source_titles %}<div class="source-chip-row"><span>Used:</span>{% for title in artifact.source_titles %}<strong>{{ title }}</strong>{% endfor %}</div>{% endif %}<div class="artifact-actions"><a class="mini-action" href="{% url 'academy:artifact_download' public_id=project.public_id artifact_id=artifact.public_id %}">Download .md</a>{% if artifact.status == 'review' or artifact.status == 'draft' %}<form method="post" action="{% url 'academy:artifact_action' public_id=project.public_id artifact_id=artifact.public_id %}">{% csrf_token %}<input type="hidden" name="action" value="approve"><button class="mini-action approve-action" type="submit">Approve this version</button></form>{% endif %}</div></article>
+          {% empty %}<div class="empty-classroom"><strong>No test outputs yet.</strong><p>Teach and approve files first, then test what the agent retained.</p></div>{% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <aside class="agent-history-column">
+      {% if agent_site_live and not is_agent_host %}<div class="handoff-card"><span>NEW PRIVATE ADDRESS</span><h2>Move this classroom to the agent domain.</h2><p>A one-use, ten-minute handoff opens this same agent in the other host. It does not create a shared parent-domain cookie.</p><form method="post" action="{% url 'academy:create_handoff' public_id=project.public_id %}">{% csrf_token %}<button class="button button-lime" type="submit">Open on agent.teachthecompany.com <span>→</span></button></form></div>{% endif %}
+      <div class="export-card"><span>PORTABLE CODEX PACKAGE</span><h2>Take the memory with you.</h2><p>Download `AGENTS.md`, YAML rules, cognitive memory, all files, questions, originals, outputs, and history in one ZIP.</p><a class="button button-blue" href="{% url 'academy:export_training' public_id=project.public_id %}">Download ZIP <span>↓</span></a><a class="export-doc-link" href="https://developers.openai.com/codex/guides/agents-md/" rel="noreferrer">How Codex reads AGENTS.md ↗</a></div>
+      <div class="history-card"><div class="report-top"><span>VERSION HISTORY</span><i>PRIVATE</i></div><div class="history-list">{% for event in events %}<article><span class="history-dot kind-{{ event.kind }}"></span><small>{{ event.created_at|date:"M j · H:i" }}</small><strong>{{ event.headline }}</strong><p>{{ event.detail }}</p></article>{% empty %}<p>No history yet.</p>{% endfor %}</div></div>
+      <div class="privacy-lock"><span aria-hidden="true">⌁</span><div><strong>Private by default</strong><p>Only this browser session and the moderator can open the agent. Uploaded files have no public URL.</p></div></div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

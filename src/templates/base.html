@@ -1,0 +1,90 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{% block meta_description %}{{ default_meta_description }}{% endblock %}">
+  <meta name="robots" content="{% if page_noindex %}noindex, nofollow{% else %}index, follow, max-image-preview:large{% endif %}">
+  <meta name="theme-color" content="#171c36">
+  {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Teach the Company">
+  <meta property="og:title" content="{% block og_title %}Teach the Company — Free practical AI school{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ default_meta_description }}{% endblock %}">
+  {% if canonical_url %}<meta property="og:url" content="{{ canonical_url }}">{% endif %}
+  <meta property="og:image" content="{{ public_site_origin }}/static/img/social-card-20261003.png">
+  <meta property="og:image:secure_url" content="{{ public_site_origin }}/static/img/social-card-20261003.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Teach the Company chalkboard: Teach one agent. Inspect everything.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ public_site_origin }}/static/img/social-card-20261003.png">
+  <meta name="twitter:image:alt" content="Teach the Company chalkboard: Teach one agent. Inspect everything.">
+  <title>{% block title %}Teach the Company — Free practical AI school{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}">
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}">
+  <link rel="mask-icon" href="{% static 'img/favicon.svg' %}" color="#163d35">
+  <link rel="manifest" href="{% url 'academy:site_manifest' %}">
+  <meta name="apple-mobile-web-app-title" content="Teach">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=20261003-1">
+  <script src="{% static 'js/site.js' %}?v=20261003-1" defer></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"{{ public_site_origin }}/#organization","name":"Teach the Company","url":"{{ public_site_origin }}/"},{"@type":"WebSite","@id":"{{ public_site_origin }}/#website","name":"Teach the Company","url":"{{ public_site_origin }}/","publisher":{"@id":"{{ public_site_origin }}/#organization"},"inLanguage":"en"}]}</script>
+  {% block structured_data %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav-wrap">
+      <a class="brand" href="{% url 'academy:home' %}" aria-label="Teach the Company home">
+        <span class="brand-board" aria-hidden="true"><i>T</i><i>C</i></span>
+        <span class="brand-copy"><strong>Teach the Company</strong><small>{% if is_agent_host %}Private agent classroom{% else %}Agent training · visible memory{% endif %}</small></span>
+      </a>
+      <nav aria-label="Main navigation">
+        {% if not is_agent_host %}<a href="{% url 'academy:school' %}">School</a>
+        <a href="{% url 'academy:manuals' %}">Manuals</a>
+        <a href="{% url 'academy:compose' %}">Build a pack</a>
+        <a href="{% url 'academy:demos' %}">Proof</a>
+        <a href="{{ security_lab_url }}">Security</a>
+        <a href="{% url 'academy:transparency' %}">Transparency</a>{% endif %}
+        {% if owned_project %}<a class="nav-cta" href="{% url 'academy:studio' public_id=owned_project.public_id %}">My classroom <span aria-hidden="true">→</span></a>{% else %}<a class="nav-cta" href="{{ classroom_origin }}{% url 'academy:request_access' %}">Request access <span aria-hidden="true">↗</span></a>{% endif %}
+      </nav>
+    </div>
+  </header>
+
+  {% if messages %}
+    <div class="shell message-stack" aria-live="polite">
+      {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <main id="main">{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div>
+        <span class="footer-label">The agent is the student</span>
+        <h2>Teach one agent.<br>Inspect everything.</h2>
+        {% if is_agent_host %}<a class="button button-lime" href="{{ public_site_origin }}{% url 'academy:demos' %}">Explore the demo agents <span>→</span></a>{% else %}<a class="button button-lime" href="{% url 'academy:demos' %}">Explore the demo agents <span>→</span></a>{% endif %}
+      </div>
+      <div class="footer-notes">
+        <p><strong>Teach the Company</strong> turns knowledge, examples, corrections and tests into versioned agent files—with human approval before anything leaves the classroom.</p>
+        <p class="fine-print">The public agents and their histories are fabricated demonstrations. Private installations can connect an OpenAI-compatible or local model; the website does not claim model-weight fine-tuning.</p>
+        <div class="footer-links">
+          <a href="{% url 'academy:demos' %}">Demo agents</a>
+          <a href="{% url 'academy:school' %}">AI school</a>
+          <a href="{% url 'academy:manuals' %}">Public manuals</a>
+          <a href="{% url 'academy:suggest' %}">Suggest a correction</a>
+          <a href="{% url 'academy:self_host' %}">Docker self-hosting</a>
+          <a href="{% url 'academy:principles' %}">Privacy &amp; rules</a>
+          <a href="{% url 'academy:open_source' %}">Open source</a>
+          <a href="{% url 'academy:changelog' %}">Changelog</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ source.logical_path }} — {{ project.agent_name }}{% endblock %}
+{% block body_class %}source-detail-page{% endblock %}
+{% block content %}
+<section class="page-hero light-page-hero">
+  <div class="shell source-hero"><div><span class="eyebrow blue">Visible agent file</span><h1>{{ source.logical_path }}</h1><p>{{ source.title }}</p></div><a class="button button-dark" href="{% url 'academy:studio' public_id=project.public_id %}#file-tree">Back to all files <span>←</span></a></div>
+</section>
+<section class="section paper-section">
+  <div class="shell source-reader-grid">
+    <article class="source-reader">
+      <div class="source-reader-meta"><span class="status-pill status-{{ source.status }}">{{ source.get_status_display }}</span><strong>v{{ source.revision_number }}</strong><span>{{ source.get_kind_display }}</span><span>{{ source.checksum|slice:':12' }}</span></div>
+      <pre>{{ source.content_text }}</pre>
+      <div class="button-row"><a class="button button-blue" href="{% url 'academy:source_download' public_id=project.public_id source_id=source.public_id %}">Download agent file <span>↓</span></a>{% if source.uploaded_file %}<a class="mini-action" href="{% url 'academy:source_original_download' public_id=project.public_id source_id=source.public_id %}">Download original · {{ source.original_filename }}</a>{% endif %}</div>
+    </article>
+    <aside class="revision-card">
+      <span class="eyebrow coral">Revision history</span>
+      {% for revision in source.revisions.all %}<article><strong>Version {{ revision.number }}</strong><span>{{ revision.get_status_display }} · {{ revision.created_at|date:"M j, Y H:i" }}</span><p>{{ revision.change_note }}</p></article>{% empty %}<p>No revisions recorded.</p>{% endfor %}
+      {% if source.training_questions.all %}<span class="eyebrow coral">Questions about this file</span>{% for question in source.training_questions.all %}<article><strong>{{ question.prompt }}</strong><span>{{ question.get_status_display }}</span>{% if question.answer_text %}<p>{{ question.answer_text }}</p>{% endif %}</article>{% endfor %}{% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

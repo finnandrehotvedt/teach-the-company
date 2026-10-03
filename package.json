@@ -1,0 +1,13 @@
+{
+  "name": "teach-the-company-browser-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pinned browser acceptance runtime for the Teach the Company self-host source.",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "playwright": "1.55.0"
+  },
+  "scripts": {
+    "check:syntax": "node --check scripts/browser_acceptance.js && node --check scripts/chalk_visual_acceptance.js && node --check scripts/domain_suite_browser_acceptance.js && node --check scripts/favicon_browser_acceptance.js && node --check scripts/public_browser_acceptance.js && node --check scripts/school_release_acceptance.js && node --check security-lab/scripts/browser_acceptance.js"
+  }
+}

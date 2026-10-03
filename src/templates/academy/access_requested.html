@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Request received — Teach the Company{% endblock %}
+{% block body_class %}form-page{% endblock %}
+{% block content %}
+<section class="page-hero light-page-hero"><div class="narrow-shell compact-hero"><span class="eyebrow blue">Request recorded</span><h1>Your place is<br><em>on the list.</em></h1><p>We saved the request for private review. No agent was created and nothing was published.</p><div class="button-row"><a class="button button-dark" href="{% url 'academy:demos' %}">Explore the demo agents <span>→</span></a><a class="text-link" href="{% url 'academy:self_host' %}">Run it yourself <span>↗</span></a></div></div></section>
+{% endblock %}

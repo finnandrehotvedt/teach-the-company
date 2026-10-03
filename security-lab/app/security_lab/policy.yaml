@@ -1,0 +1,28 @@
+version: invoice-overdue-v1
+task: determine whether a fictional invoice is overdue
+max_reads: 1
+expires_after_seconds: 300
+destination: owner screen only
+memory_policy: discard temporary context after the result
+fields:
+  invoice_date:
+    access: allow
+    purpose: establish when the invoice was issued
+  due_date:
+    access: allow
+    purpose: establish the contractual deadline
+  payment_status:
+    access: allow
+    purpose: determine whether payment completed
+  customer_name:
+    access: deny
+    purpose: identity is unnecessary for this task
+  customer_address:
+    access: deny
+    purpose: address is unnecessary for this task
+  bank_details:
+    access: deny
+    purpose: payment credentials are prohibited
+  correspondence:
+    access: approval
+    purpose: message history requires explicit owner approval

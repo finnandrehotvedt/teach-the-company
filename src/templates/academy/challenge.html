@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ project.public_title|default:project.agent_name }} — Teach the Company{% endblock %}
+{% block body_class %}challenge-page agent-history-page{% endblock %}
+{% block content %}
+<section class="challenge-hero">
+  <div class="shell challenge-hero-grid">
+    <div>
+      <div class="demo-label"><span>PUBLIC AGENT HISTORY</span><strong>FICTIONAL DEMO</strong></div>
+      <h1>{{ project.public_title|default:project.agent_name }}</h1>
+      <p>{{ project.public_summary|default:project.mission }}</p>
+      <div class="challenge-meta"><span><strong>{{ sources|length }}</strong> public files</span><span><strong>{{ events|length }}</strong> visible events</span><span><strong>{{ artifacts|length }}</strong> produced files</span><span><strong>0</strong> real tools</span></div>
+    </div>
+    <div class="exam-seal"><span>AGENT</span><strong>{{ sources|length }}</strong><small>ACTIVE<br>FILES</small></div>
+  </div>
+</section>
+
+<section class="section paper-section">
+  <div class="shell public-agent-grid">
+    <div>
+      <div class="section-heading compact-heading"><span class="eyebrow blue">Training repository</span><h2>Open every file it learned from.</h2><p>This is fabricated public-safe content. No private document is hidden behind these summaries.</p></div>
+      <div class="public-file-list">
+        {% for source in sources %}<details class="public-file"><summary><span>{% if source.logical_path == 'AGENTS.md' %}A{% else %}F{% endif %}</span><strong>{{ source.logical_path }}</strong><i>{{ source.get_status_display }} · v{{ source.revision_number }}</i></summary><div><h3>{{ source.title }}</h3><pre>{{ source.content_text }}</pre>{% if source.source_url %}<a href="{{ source.source_url }}" rel="nofollow noreferrer">Recorded source link ↗</a>{% endif %}</div></details>{% endfor %}
+      </div>
+    </div>
+    <aside class="history-card public-history-card">
+      <div class="report-top"><span>LEARNING HISTORY</span><i>VISIBLE</i></div>
+      <div class="history-list">{% for event in events reversed %}<article><span class="history-dot kind-{{ event.kind }}"></span><small>{{ event.created_at|date:"M j" }}</small><strong>{{ event.headline }}</strong><p>{{ event.detail }}</p></article>{% endfor %}</div>
+    </aside>
+  </div>
+</section>
+
+<section class="section question-demo-section"><div class="shell"><div class="section-heading compact-heading"><span class="eyebrow coral">Questions the agent asked</span><h2>Uncertainty became visible.</h2><p>These fabricated examples show quick answers and teacher explanations becoming inspectable memory.</p></div><div class="public-question-grid">{% for question in questions %}<article><span>{{ question.get_answer_kind_display }}</span><h3>{{ question.prompt }}</h3><p>{{ question.answer_text }}</p>{% if question.source %}<small>{{ question.source.logical_path }}</small>{% endif %}</article>{% endfor %}</div></div></section>
+
+<section class="section produced-files-section">
+  <div class="shell">
+    <div class="section-heading compact-heading"><span class="eyebrow lime">Agent’s desk</span><h2>Files it produced.</h2><p>Every file shows its review state and the sources used. These copies were fabricated for the demonstration.</p></div>
+    <div class="public-artifact-grid">{% for artifact in artifacts %}<article><div class="artifact-card-top"><span class="status-pill status-{{ artifact.status }}">{{ artifact.get_status_display }}</span><small>{{ artifact.logical_path }} · v{{ artifact.revision_number }}</small></div><h3>{{ artifact.title }}</h3><pre>{{ artifact.content }}</pre>{% if artifact.source_titles %}<div class="source-chip-row"><span>Used:</span>{% for title in artifact.source_titles %}<strong>{{ title }}</strong>{% endfor %}</div>{% endif %}</article>{% endfor %}</div>
+  </div>
+</section>
+
+<section class="section exam-section">
+  <div class="shell public-test-layout">
+    <div>
+      <div class="exam-instructions"><span>SAFE SANDBOX TEST</span><h2>Can you find something it has not learned?</h2><p>Use a simulated situation only. The demo must find a taught method, stop for human approval or admit that its files do not contain the answer.</p></div>
+      <form method="post" class="challenge-form public-challenge-form" novalidate>{% csrf_token %}{{ form.website }}<div class="field {% if form.prompt.errors %}has-error{% endif %}">{{ form.prompt.label_tag }}{{ form.prompt }}<small>{{ form.prompt.help_text }}</small>{{ form.prompt.errors }}</div><button class="button button-coral" type="submit" {% if rate_limited %}disabled{% endif %}>Challenge the agent <span>→</span></button></form>
+      {% include "academy/_result.html" %}
+      <div class="prototype-note"><strong>Transparent prototype</strong><p>The public sandbox uses deterministic matching against reviewed fictional summaries. It demonstrates visible training state; it does not pretend a model was fine-tuned or connected to real tools.</p></div>
+    </div>
+    <aside class="public-report">
+      <div class="report-top"><span>PUBLIC REPORT CARD</span><i>FICTIONAL</i></div><h3>{{ project.agent_name }}</h3><p>{{ project.company_name }}</p>
+      <div class="report-numbers"><div><strong>{{ outcome_counts.learned|default:0 }}</strong><span>Taught method</span></div><div><strong>{{ outcome_counts.approval|default:0 }}</strong><span>Asked a human</span></div><div><strong>{{ outcome_counts.not_learned|default:0 }}</strong><span>Learning gaps</span></div></div>
+      <div class="report-rule"><span>Privacy check</span><strong>Real private material exposed: none</strong></div>
+      <button class="share-button" type="button" data-share-url="{{ public_site_origin }}{{ project.public_url }}" data-share-title="Inspect {{ project.agent_name }}">Share this agent history <span>↗</span></button>
+    </aside>
+  </div>
+</section>
+{% endblock %}

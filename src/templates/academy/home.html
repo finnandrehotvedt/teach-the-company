@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Teach the Company — Teach your AI how you work{% endblock %}
+{% block body_class %}home-page{% endblock %}
+{% block content %}
+<section class="hero classroom-hero">
+  <div class="shell hero-grid">
+    <div class="hero-copy">
+      <div class="chalk-label"><span></span> Free English AI school · versioned training files</div>
+      <h1>Learn AI.<br><em>Then teach it.</em></h1>
+      <p class="hero-lead">Twenty practical lessons take you from clear prompts and verification to visible agent memory, tests, security and self-hosting. Then build a free instruction pack for your own agent.</p>
+      <div class="button-row">
+        {% if owned_project %}<a class="button button-lime" href="{% url 'academy:studio' public_id=owned_project.public_id %}">Continue training {{ owned_project.agent_name }} <span>→</span></a><a class="text-link light-link" href="{% url 'academy:school' %}">Open the free AI school <span>↗</span></a>{% else %}<a class="button button-lime" href="{% url 'academy:school' %}">Start the free school <span>→</span></a><a class="text-link light-link" href="{% url 'academy:compose' %}">Build my learning pack <span>↗</span></a>{% endif %}
+      </div>
+      <div class="hero-note"><span aria-hidden="true">✦</span><p><strong>The agent is the student.</strong> Docker is the classroom; portable files are what the student takes with it.</p></div>
+    </div>
+
+    <div class="classroom-scene" aria-label="AI agent classroom board illustration">
+      <div class="board-frame">
+        <div class="board-topline"><span>AGENT CLASSROOM · TRAINING REPOSITORY</span><button class="chalk-motion-control" type="button" data-chalk-motion hidden>Play chalk writing ↻</button><i></i><i></i><i></i></div>
+        <div class="chalk-board chalk-motion-opt-in" data-chalk-board>
+          <span class="chalk-date">ONE AGENT · FULL HISTORY</span>
+          <span class="chalk-hand-note" aria-hidden="true">Today’s lesson…</span>
+          <div class="chalk-writing" aria-label="Can you teach it?">
+            <span class="chalk-script chalk-script-one" aria-hidden="true"><span class="chalk-letter">C</span><span class="chalk-letter">a</span><span class="chalk-letter">n</span><span class="chalk-letter">&nbsp;</span><span class="chalk-letter">y</span><span class="chalk-letter">o</span><span class="chalk-letter">u</span></span>
+            <span class="chalk-script chalk-script-two" aria-hidden="true"><span class="chalk-letter">t</span><span class="chalk-letter">e</span><span class="chalk-letter">a</span><span class="chalk-letter">c</span><span class="chalk-letter">h</span><span class="chalk-letter">&nbsp;</span><span class="chalk-letter">i</span><span class="chalk-letter">t</span><span class="chalk-letter">?</span></span>
+            <i class="chalk-stick" aria-hidden="true"></i>
+          </div>
+          <div class="chalk-flow"><b>TEACH</b><i>→</i><b>TEST</b><i>→</i><b>APPROVE</b></div>
+          <div class="chalk-proof" aria-hidden="true">
+            <svg class="chalk-line" viewBox="0 0 300 70"><path d="M4 47 C75 4 202 72 294 14"/><path d="M252 10 L294 14 L270 47"/></svg>
+            <span class="chalk-answer">remember what worked.</span>
+          </div>
+        </div>
+      </div>
+      <div class="desk-card desk-card-one"><span>01</span><strong>AGENTS.md</strong><small>training mode</small></div>
+      <div class="desk-card desk-card-two"><span>v3</span><strong>CORRECT</strong><small>approve revision</small></div>
+      <div class="teacher-stamp">HUMAN<br>APPROVED</div>
+    </div>
+  </div>
+  <div class="shell class-stats">
+    <div><strong>{{ public_projects|length }}</strong><span>fictional demo agents</span></div>
+    <div><strong>1</strong><span>agent per classroom</span></div>
+    <div><strong>100%</strong><span>visible file history</span></div>
+    <div class="class-rule"><span>Class rule № 1</span><strong>Only approved files become active training.</strong></div>
+  </div>
+</section>
+
+<section class="section paper-section method-intro">
+  <div class="shell split-heading">
+    <div>
+      <span class="eyebrow blue">The missing tool</span>
+      <h2>Give it knowledge.<br><em>Ask again later.</em></h2>
+    </div>
+    <div class="teacher-note">
+      <span>Teacher's note</span>
+      <p>The useful unit is not a clever prompt. It is a durable agent file: inspectable, versioned, correctable and approved.</p>
+    </div>
+  </div>
+  <div class="principle-row">
+    <article><span class="number-badge">A</span><h3>Add</h3><p>Upload documents, paste links or explain something in your own words. Every item becomes a visible file.</p></article>
+    <article><span class="number-badge">B</span><h3>Process</h3><p>The agent inspects new files together and asks only where authority, scope, conflict or exceptions remain unclear.</p></article>
+    <article><span class="number-badge">C</span><h3>Remember</h3><p>Quick answers and explanations become cognitive memory. Approve the files, then download the complete Codex ZIP.</p></article>
+  </div>
+</section>
+
+<section class="section syllabus-section" id="demo-agents">
+  <div class="shell">
+    <div class="section-heading syllabus-heading">
+      <div><span class="eyebrow lime">Open classroom doors</span><h2>See how an agent<br>actually learned.</h2></div>
+      <p>Every public example is fabricated and safe. Open the file tree, follow the corrections, inspect the produced work and try a sandbox challenge.</p>
+    </div>
+    <div class="agent-card-grid">
+      {% for project in public_projects %}
+      <article class="agent-card">
+        <div class="agent-card-top"><span>FICTIONAL AGENT {{ forloop.counter|stringformat:"02d" }}</span><i>PUBLIC HISTORY</i></div>
+        <h3>{{ project.agent_name }}</h3>
+        <p>{{ project.public_summary }}</p>
+        <div class="agent-card-counts"><span><strong>{{ project.source_count }}</strong> files</span><span><strong>{{ project.artifact_count }}</strong> outputs</span></div>
+        <a class="button button-dark full-button" href="{{ project.public_url }}">Open the classroom <span>→</span></a>
+      </article>
+      {% empty %}
+      <article class="agent-card"><h3>Demo classroom is starting</h3><p>The fictional histories are being prepared.</p></article>
+      {% endfor %}
+    </div>
+    <div class="center-link"><a class="button button-lime" href="{% url 'academy:demos' %}">See all demo histories <span>→</span></a></div>
+  </div>
+</section>
+
+<section class="section paper-section repository-section">
+  <div class="shell repository-grid">
+    <div>
+      <span class="eyebrow blue">Apache-2.0 Docker framework</span>
+      <h2>A classroom that looks like a repository.</h2>
+      <p class="section-lead">The complete self-hosting source is open for people and companies. The interface keeps Git and YAML understandable; underneath, the agent receives a clean, portable Codex file structure.</p>
+      <div class="button-row"><a class="button button-blue" href="{% url 'academy:self_host' %}">Clone the open-source framework <span>→</span></a></div>
+    </div>
+    <div class="repo-board" aria-label="Example agent file tree">
+      <div><span>●</span><strong>AGENTS.md</strong><i>active · Codex entry</i></div>
+      <div><span>├</span><strong>rules/training-rules.yaml</strong><i>active · structured rules</i></div>
+      <div><span>├</span><strong>memory/teacher-notes/</strong><i>cognitive memory</i></div>
+      <div><span>├</span><strong>knowledge/manual.md</strong><i>active · v2</i></div>
+      <div><span>├</span><strong>procedures/checklist.md</strong><i>active · v1</i></div>
+      <div><span>├</span><strong>corrections/no-guessing.yaml</strong><i>active · v3</i></div>
+      <div><span>├</span><strong>tests/unseen-case.yaml</strong><i>passed · v1</i></div>
+      <div><span>└</span><strong>_training/history.md</strong><i>included in ZIP</i></div>
+    </div>
+  </div>
+</section>
+
+<section class="section domain-suite-section">
+  <div class="shell">
+    <div class="section-heading domain-heading">
+      <div><span class="eyebrow lime">Three clear rooms</span><h2>Learn in public.<br>Train in private.<br>Test with fake data.</h2></div>
+      <p>The domain tells you which boundary you are in. Public guides are searchable. Private classrooms are not indexed. The security lab accepts only built-in synthetic cases.</p>
+    </div>
+    <div class="domain-card-grid">
+      <article class="domain-card public-room"><span>01 · PUBLIC LIBRARY</span><h3>teachthecompany.com</h3><p>Practical guides, fabricated agent histories, methodology, limitations and visible product changes.</p><a href="{% url 'academy:train_agent' %}">Learn how agent training works <b>→</b></a></article>
+      <article class="domain-card agent-room"><span>02 · PRIVATE CLASSROOM</span><h3>agent.teachthecompany.com</h3><p>One person teaches one agent through files, processing, clarification, approval and a portable ZIP.</p><a href="{{ classroom_origin }}">{% if agent_site_live %}Open the private classroom{% else %}Preview the classroom plan{% endif %} <b>→</b></a></article>
+      <article class="domain-card security-room"><span>03 · SYNTHETIC LAB</span><h3>security.teachthecompany.com</h3><p>See least-privilege decisions and privacy receipts using fixed fictional records—never customer uploads.</p><a href="{{ security_lab_url }}">{% if security_lab_live %}Run a security test{% else %}Read the security method{% endif %} <b>→</b></a></article>
+    </div>
+  </div>
+</section>
+
+<section class="section access-band">
+  <div class="shell access-band-grid">
+    <div><span class="eyebrow coral">Open source or managed</span><h2>Teach one agent with your own material.</h2><p>Run the complete open-source Docker base in your company, or request an invitation when you want the managed service from us.</p></div>
+    <div class="access-actions"><a class="button button-coral" href="{{ classroom_origin }}{% url 'academy:request_access' %}">Request private access <span>→</span></a><a class="text-link" href="{% url 'academy:self_host' %}">Self-host instead <span>↗</span></a></div>
+  </div>
+</section>
+
+<div class="class-marquee" aria-hidden="true"><div>ADD FILES <span>✦</span> PROCESS TOGETHER <span>✦</span> ANSWER UNCERTAINTY <span>✦</span> APPROVE THE MEMORY <span>✦</span> DOWNLOAD FOR CODEX <span>✦</span></div></div>
+{% endblock %}

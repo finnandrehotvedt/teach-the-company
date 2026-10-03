@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ guide.title }} — Teach the Company{% endblock %}
+{% block meta_description %}{{ guide.meta }}{% endblock %}
+{% block og_title %}{{ guide.title }} — Teach the Company{% endblock %}
+{% block og_description %}{{ guide.meta }}{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ structured_data|safe }}</script>{% endblock %}
+{% block body_class %}guide-page{% endblock %}
+{% block content %}
+<section class="guide-hero"><div class="narrow-shell"><span class="eyebrow lime">{{ guide.eyebrow }}</span><h1>{{ guide.title }}</h1><p>{{ guide.lead }}</p></div></section>
+<section class="section guide-body"><div class="shell guide-grid">
+  {% for heading, body in guide.sections %}<article><span>0{{ forloop.counter }}</span><h2>{{ heading }}</h2><p>{{ body }}</p></article>{% endfor %}
+</div></section>
+<section class="section guide-takeaway"><div class="narrow-shell"><span class="eyebrow blue">The practical rule</span><h2>{{ guide.takeaway }}</h2><div class="guide-links">{% for label, href in related %}<a href="{{ href }}">{{ label }} <span>→</span></a>{% endfor %}</div></div></section>
+{% endblock %}

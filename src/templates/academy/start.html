@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Create one private agent — Teach the Company{% endblock %}
+{% block body_class %}form-page{% endblock %}
+{% block content %}
+<section class="page-hero light-page-hero">
+  <div class="narrow-shell compact-hero"><span class="eyebrow blue">{% if invite %}Private invitation{% else %}Self-hosted classroom{% endif %}</span><h1>Create one<br><em>private agent.</em></h1><p>Name the agent and enter the classroom. It begins in training mode without assuming a job.</p></div>
+</section>
+<section class="section paper-section">
+  <div class="narrow-shell form-layout">
+    <form method="post" class="course-form" novalidate>
+      {% csrf_token %}{{ form.website }}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-chapter"><span>01</span><strong>One teacher, one agent</strong></div>
+      <div class="field-row">
+        <div class="field {% if form.learner_name.errors %}has-error{% endif %}">{{ form.learner_name.label_tag }}{{ form.learner_name }}{{ form.learner_name.errors }}</div>
+        <div class="field {% if form.learner_email.errors %}has-error{% endif %}">{{ form.learner_email.label_tag }}{{ form.learner_email }}<small>{{ form.learner_email.help_text }}</small>{{ form.learner_email.errors }}</div>
+      </div>
+      <div class="field {% if form.agent_name.errors %}has-error{% endif %}">{{ form.agent_name.label_tag }}{{ form.agent_name }}<small>{{ form.agent_name.help_text }}</small>{{ form.agent_name.errors }}</div>
+      <button class="button button-dark form-submit" type="submit">Open the agent classroom <span>→</span></button>
+    </form>
+    <aside class="form-aside classroom-aside">
+      <div class="teacher-card"><span>What happens next</span><h2>Teach with files.</h2><p>Your classroom starts with <code>AGENTS.md</code>, YAML rules and visible cognitive memory. Add material, then choose when the agent processes it.</p></div>
+      <ol class="mini-syllabus"><li><span>01</span>Add files</li><li><span>02</span>Process &amp; clarify</li><li><span>03</span>Approve or export</li></ol>
+      <p class="privacy-note-small"><strong>Private by default.</strong> Nothing becomes a public demo through this screen.</p>
+    </aside>
+  </div>
+</section>
+{% endblock %}

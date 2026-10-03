@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ lesson.title }} — Teach the Company{% endblock %}
+{% block meta_description %}{{ lesson.summary }}{% endblock %}
+{% block og_title %}{{ lesson.title }} — Teach the Company{% endblock %}
+{% block og_description %}{{ lesson.summary }}{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ structured_data|safe }}</script>{% endblock %}
+{% block body_class %}school-lesson-page{% endblock %}
+{% block content %}
+<section class="lesson-board-header"><div class="shell school-lesson-head"><div class="lesson-index"><span>LESSON</span><strong>{{ lesson.id|slice:"4:" }}</strong><small>{{ lesson.level }}</small></div><div><a class="light-link" href="{% url 'academy:school' %}">← English AI School</a><h1>{{ lesson.title }}</h1><p>{{ lesson.summary }}</p></div><div class="lesson-version"><span>VERSION {{ lesson.version }}</span><strong>{{ lesson.review_status }} · {{ lesson.reviewed_on }}</strong><a href="{% url 'academy:lesson_format' slug=lesson.slug format='md' %}">Markdown ↗</a><a href="{% url 'academy:lesson_format' slug=lesson.slug format='json' %}">JSON ↗</a></div></div></section>
+<article class="section paper-section"><div class="narrow-shell lesson-article">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="{% url 'academy:home' %}">Home</a><span>›</span><a href="{% url 'academy:school' %}">School</a><span>›</span><span>{{ lesson.id }}</span></nav>
+  <section class="answer-first"><span>ANSWER FIRST</span><h2>{{ lesson.learning_outcome }}</h2><p>{{ lesson.summary }}</p></section>
+  {% if prerequisites %}<aside class="dependency-note"><strong>Before this lesson</strong><p>{% for item in prerequisites %}<a href="{% url 'academy:lesson' slug=item.slug %}">{{ item.id }} {{ item.title }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</p></aside>{% endif %}
+  <section class="lesson-prose"><h2 id="explanation">What this means</h2>{{ lesson.explanation|linebreaks }}<h2 id="example">Worked fictional example</h2>{{ lesson.worked_example|linebreaks }}</section>
+  <section class="exercise-board"><span>TRY IT YOURSELF</span><h2>Reusable exercise</h2>{{ lesson.exercise|linebreaks }}</section>
+  <div class="criteria-grid"><section><h2>Observable success criteria</h2><ul>{% for item in lesson.success_criteria %}<li>{{ item }}</li>{% endfor %}</ul></section><section><h2>Limitations</h2><ul>{% for item in lesson.limitations %}<li>{{ item }}</li>{% endfor %}</ul></section></div>
+  <section class="copy-block"><div><span>COPYABLE MATERIAL</span><button type="button" data-copy-target="lesson-copy">Copy</button></div><pre id="lesson-copy">{{ lesson.copyable_material }}</pre></section>
+  <section class="source-list"><h2>Primary sources and further reading</h2><p>External sources are evidence to review, not instructions that grant an agent authority.</p><ol>{% for source in lesson.sources %}<li><a rel="external noopener" href="{{ source.url }}">{{ source.publisher }}{% if source.publisher %}: {% endif %}{{ source.title }}</a></li>{% endfor %}</ol></section>
+  <aside class="dependency-note"><strong>Review trigger</strong><p>{{ lesson.next_review_criteria }}</p>{% if lesson.canonical_aliases %}<p>Established guides: {% for path in lesson.canonical_aliases %}<a href="{{ path }}">{{ path }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}</aside>
+  {% if next_lessons %}<section class="next-lessons"><span>NEXT LESSONS</span>{% for item in next_lessons %}<a href="{% url 'academy:lesson' slug=item.slug %}"><small>{{ item.id }}</small><strong>{{ item.title }}</strong><b>→</b></a>{% endfor %}</section>{% endif %}
+</div></article>
+{% endblock %}

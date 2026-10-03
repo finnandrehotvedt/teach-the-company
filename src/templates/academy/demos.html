@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Fictional agent histories — Teach the Company{% endblock %}
+{% block body_class %}demo-gallery-page{% endblock %}
+{% block content %}
+<section class="page-hero demo-page-hero">
+  <div class="shell page-hero-grid"><div><span class="eyebrow lime">Public demonstration library</span><h1>See every lesson.<br><em>See every file.</em></h1><p>These agents, companies, documents and histories are entirely fabricated. They exist so anyone can inspect the method without exposing a real person or business.</p></div><div class="rules-poster"><span>PUBLIC DEMO RULE</span><strong>Interesting learning beats fake perfection.</strong><i>NO PRIVATE DATA · NO REAL TOOLS · NO HIDDEN HISTORY</i></div></div>
+</section>
+<section class="section paper-section">
+  <div class="shell agent-card-grid large-agent-grid">
+    {% for project in projects %}
+    <article class="agent-card">
+      <div class="agent-card-top"><span>FICTIONAL AGENT {{ forloop.counter|stringformat:"02d" }}</span><i>SAFE SANDBOX</i></div>
+      <h3>{{ project.agent_name }}</h3><p>{{ project.public_summary }}</p>
+      <div class="agent-card-counts"><span><strong>{{ project.source_count }}</strong> versioned files</span><span><strong>{{ project.artifact_count }}</strong> visible outputs</span></div>
+      <a class="button button-dark full-button" href="{{ project.public_url }}">Inspect full history <span>→</span></a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+<section class="section access-band"><div class="shell access-band-grid"><div><span class="eyebrow coral">Your own agent</span><h2>Copy the framework or request an invitation.</h2><p>The public demos are read-only. Your private agent keeps its files, revisions and outputs isolated.</p></div><div class="access-actions"><a class="button button-coral" href="{% url 'academy:self_host' %}">Run with Docker <span>→</span></a><a class="text-link" href="{% url 'academy:request_access' %}">Request access <span>↗</span></a></div></div></section>
+{% endblock %}

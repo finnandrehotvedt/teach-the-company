@@ -1,0 +1,11 @@
+{% if result %}
+<div class="result-card result-{{ result.outcome }}" aria-live="polite">
+  <div class="result-mark">{% if result.outcome == 'learned' %}✓{% elif result.outcome == 'approval' %}!{% else %}?{% endif %}</div>
+  <div>
+    <span class="result-label">TEST RESULT</span>
+    <h3>{{ result.label }}</h3>
+    <p>{{ result.response }}</p>
+    {% if result.evidence_titles %}<div class="evidence-line"><span>Evidence used</span>{% for title in result.evidence_titles %}<strong>{{ title }}</strong>{% endfor %}</div>{% endif %}
+  </div>
+</div>
+{% endif %}

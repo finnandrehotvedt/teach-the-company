@@ -1,0 +1,169 @@
+version: "2.4"
+
+services:
+  ingress:
+    image: nginx:1.27.5-alpine
+    depends_on:
+      app:
+        condition: service_healthy
+    user: "101:101"
+    ports:
+      - "127.0.0.1:${TTC_HTTP_PORT:-18574}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./docker/ingress.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - backend
+      - ingress
+
+  db:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  app:
+    image: ${TTC_APP_IMAGE:-local/teach-the-company:0.1.0}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY is required}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DJANGO_SITE_ORIGIN: ${DJANGO_SITE_ORIGIN:-http://127.0.0.1:18574}
+      DJANGO_SECURE_COOKIES: ${DJANGO_SECURE_COOKIES:-false}
+      DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-false}
+      DJANGO_SECURE_HSTS_SECONDS: ${DJANGO_SECURE_HSTS_SECONDS:-0}
+      DJANGO_TRUST_PROXY_HEADERS: ${DJANGO_TRUST_PROXY_HEADERS:-false}
+      DJANGO_TRUSTED_PROXY_IPS: ${DJANGO_TRUSTED_PROXY_IPS:-}
+      DJANGO_ADMIN_USERNAME: ${DJANGO_ADMIN_USERNAME:-}
+      DJANGO_ADMIN_EMAIL: ${DJANGO_ADMIN_EMAIL:-}
+      DJANGO_ADMIN_PASSWORD: ${DJANGO_ADMIN_PASSWORD:-}
+      BOOTSTRAP_DEMO: ${BOOTSTRAP_DEMO:-false}
+      TTC_OPEN_SIGNUP: ${TTC_OPEN_SIGNUP:-true}
+      TTC_PRIVATE_DATA_ROOT: ${TTC_PRIVATE_DATA_ROOT:-/app/private-data}
+      TTC_AGENT_BACKEND: ${TTC_AGENT_BACKEND:-evidence}
+      TTC_AGENT_API_URL: ${TTC_AGENT_API_URL:-}
+      TTC_AGENT_MODEL: ${TTC_AGENT_MODEL:-local-model}
+      TTC_AGENT_API_KEY: ${TTC_AGENT_API_KEY:-}
+      TTC_AGENT_TIMEOUT_SECONDS: ${TTC_AGENT_TIMEOUT_SECONDS:-180}
+      TTC_AGENT_CONTEXT_TOKENS: ${TTC_AGENT_CONTEXT_TOKENS:-8192}
+      TTC_AGENT_CONTEXT_CHAR_LIMIT: ${TTC_AGENT_CONTEXT_CHAR_LIMIT:-48000}
+      TTC_AGENT_MAX_OUTPUT_TOKENS: ${TTC_AGENT_MAX_OUTPUT_TOKENS:-768}
+      TTC_FETCH_PROXY_SOCKET: ${TTC_FETCH_PROXY_SOCKET:-/run/fetch-proxy/fetch.sock}
+      DJANGO_PUBLIC_SITE_ORIGIN: ${DJANGO_PUBLIC_SITE_ORIGIN:-http://127.0.0.1:18574}
+      DJANGO_AGENT_SITE_ORIGIN: ${DJANGO_AGENT_SITE_ORIGIN:-http://agent.localhost:18574}
+      TTC_SECURITY_LAB_ORIGIN: ${TTC_SECURITY_LAB_ORIGIN:-http://127.0.0.1:18575}
+      TTC_PUBLIC_MANUALS_REPOSITORY_URL: ${TTC_PUBLIC_MANUALS_REPOSITORY_URL:-https://gitlab.finnandre.no/finnandrehotvedt/teach-the-company-public-manuals}
+      TTC_SOURCE_REPOSITORY_URL: ${TTC_SOURCE_REPOSITORY_URL:-https://gitlab.finnandre.no/finnandrehotvedt/teach-the-company}
+      TTC_GITHUB_SOURCE_REPOSITORY_URL: ${TTC_GITHUB_SOURCE_REPOSITORY_URL:-https://github.com/finnandrehotvedt/teach-the-company}
+      TTC_PUBLIC_HOSTS: ${TTC_PUBLIC_HOSTS:-127.0.0.1,localhost}
+      TTC_AGENT_HOSTS: ${TTC_AGENT_HOSTS:-agent.localhost}
+      TTC_AGENT_SITE_LIVE: ${TTC_AGENT_SITE_LIVE:-false}
+      TTC_SECURITY_LAB_LIVE: ${TTC_SECURITY_LAB_LIVE:-false}
+      TTC_ENFORCE_HOST_ROUTES: ${TTC_ENFORCE_HOST_ROUTES:-false}
+      TTC_TRANSACTIONAL_NOTIFICATIONS_ENABLED: ${TTC_TRANSACTIONAL_NOTIFICATIONS_ENABLED:-false}
+      TTC_TRANSACTIONAL_EMAIL_DELIVERY_ENABLED: ${TTC_TRANSACTIONAL_EMAIL_DELIVERY_ENABLED:-false}
+      TTC_TRANSACTIONAL_EMAIL_DAILY_CAP: ${TTC_TRANSACTIONAL_EMAIL_DAILY_CAP:-100}
+      TTC_TRANSACTIONAL_EMAIL_RECIPIENT_DAILY_CAP: ${TTC_TRANSACTIONAL_EMAIL_RECIPIENT_DAILY_CAP:-4}
+      TTC_TRANSACTIONAL_EMAIL_SOURCE_DAILY_CAP: ${TTC_TRANSACTIONAL_EMAIL_SOURCE_DAILY_CAP:-4}
+      TTC_TRANSACTIONAL_EMAIL_MAX_ATTEMPTS: ${TTC_TRANSACTIONAL_EMAIL_MAX_ATTEMPTS:-3}
+      TTC_TRANSACTIONAL_EMAIL_FROM: ${TTC_TRANSACTIONAL_EMAIL_FROM:-teachthecompany@example.invalid}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-localhost}
+      EMAIL_PORT: ${EMAIL_PORT:-25}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-false}
+      EMAIL_TIMEOUT: ${EMAIL_TIMEOUT:-10}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz/', timeout=2).read()"]
+      interval: 10s
+      timeout: 4s
+      retries: 12
+      start_period: 20s
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - static_data:/app/staticfiles
+      - private_data:/app/private-data
+      - fetch_proxy_socket:/run/fetch-proxy
+
+  fetch-proxy:
+    image: ${TTC_APP_IMAGE:-local/teach-the-company:0.1.0}
+    entrypoint: ["python", "-m", "config.fetch_proxy"]
+    environment:
+      FETCH_PROXY_SOCKET: /run/fetch-proxy/fetch.sock
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(socket.AF_UNIX); s.settimeout(2); s.connect('/run/fetch-proxy/fetch.sock'); s.sendall(b'GET /healthz HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n'); assert b'200 OK' in s.recv(1024)"]
+      interval: 10s
+      timeout: 4s
+      retries: 12
+      start_period: 5s
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - fetch_proxy_socket:/run/fetch-proxy
+    networks:
+      - fetch_egress
+
+volumes:
+  postgres_data:
+  static_data:
+  private_data:
+  fetch_proxy_socket:
+
+networks:
+  backend:
+    internal: true
+    ipam:
+      config:
+        - subnet: ${TTC_BACKEND_SUBNET:-172.31.111.0/28}
+  fetch_egress:
+    ipam:
+      config:
+        - subnet: ${TTC_FETCH_EGRESS_SUBNET:-172.31.110.0/28}
+  ingress:

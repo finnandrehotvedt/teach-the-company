@@ -1,0 +1,204 @@
+{
+  "name": "Teach the Company public manuals",
+  "version": "1.0.1",
+  "reviewed_on": "2026-10-03",
+  "author": "Finn Andre Hotvedt",
+  "assistance": "Developed with assistance from ChatGPT and Codex by OpenAI.",
+  "canonical_site": "https://teachthecompany.com/manuals/",
+  "canonical_repository": "https://gitlab.finnandre.no/finnandrehotvedt/teach-the-company-public-manuals",
+  "license": "Apache-2.0",
+  "manuals": [
+    {
+      "slug": "learn-and-compose",
+      "title": "Learn AI and compose a useful path",
+      "version": "1.0.0",
+      "reviewed_on": "2026-10-03",
+      "lesson_ids": [
+        "TTC-101",
+        "TTC-102",
+        "TTC-103",
+        "TTC-104",
+        "TTC-105",
+        "TTC-106",
+        "TTC-107"
+      ],
+      "file": "manuals/learn-and-compose.md",
+      "canonical_url": "https://teachthecompany.com/manuals/learn-and-compose/"
+    },
+    {
+      "slug": "context-rules-and-memory",
+      "title": "Build context, rules, examples and visible memory",
+      "version": "1.0.0",
+      "reviewed_on": "2026-10-03",
+      "lesson_ids": [
+        "TTC-108",
+        "TTC-109",
+        "TTC-110",
+        "TTC-111",
+        "TTC-112"
+      ],
+      "file": "manuals/context-rules-and-memory.md",
+      "canonical_url": "https://teachthecompany.com/manuals/context-rules-and-memory/"
+    },
+    {
+      "slug": "versions-tests-and-review",
+      "title": "Version, test and review agent behavior",
+      "version": "1.0.0",
+      "reviewed_on": "2026-10-03",
+      "lesson_ids": [
+        "TTC-113",
+        "TTC-114",
+        "TTC-115"
+      ],
+      "file": "manuals/versions-tests-and-review.md",
+      "canonical_url": "https://teachthecompany.com/manuals/versions-tests-and-review/"
+    },
+    {
+      "slug": "permissions-and-safe-action",
+      "title": "Bound permissions and consequential action",
+      "version": "1.0.0",
+      "reviewed_on": "2026-10-03",
+      "lesson_ids": [
+        "TTC-116",
+        "TTC-117",
+        "TTC-118"
+      ],
+      "file": "manuals/permissions-and-safe-action.md",
+      "canonical_url": "https://teachthecompany.com/manuals/permissions-and-safe-action/"
+    },
+    {
+      "slug": "freshness-portability-and-self-hosting",
+      "title": "Maintain freshness and run a portable classroom",
+      "version": "1.0.0",
+      "reviewed_on": "2026-10-03",
+      "lesson_ids": [
+        "TTC-119",
+        "TTC-120"
+      ],
+      "file": "manuals/freshness-portability-and-self-hosting.md",
+      "canonical_url": "https://teachthecompany.com/manuals/freshness-portability-and-self-hosting/"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "TTC-101",
+      "title": "AI capabilities and limits",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/ai-capabilities-and-limits/"
+    },
+    {
+      "id": "TTC-102",
+      "title": "Clear prompts and task briefs",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/clear-prompts-and-task-briefs/"
+    },
+    {
+      "id": "TTC-103",
+      "title": "Verification and source reading",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/verification-and-source-reading/"
+    },
+    {
+      "id": "TTC-104",
+      "title": "Everyday privacy and data minimization",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/everyday-privacy-and-data-minimization/"
+    },
+    {
+      "id": "TTC-105",
+      "title": "Human decisions and approval",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/human-decisions-and-approval/"
+    },
+    {
+      "id": "TTC-106",
+      "title": "AI for learning and studying",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/ai-for-learning-and-studying/"
+    },
+    {
+      "id": "TTC-107",
+      "title": "Multimodal literacy: images, audio, and text",
+      "level": "beginner",
+      "canonical_url": "https://teachthecompany.com/school/multimodal-literacy/"
+    },
+    {
+      "id": "TTC-108",
+      "title": "Teach one agent a bounded role",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/teach-one-agent-a-bounded-role/"
+    },
+    {
+      "id": "TTC-109",
+      "title": "Knowledge and provenance",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/knowledge-and-provenance/"
+    },
+    {
+      "id": "TTC-110",
+      "title": "Examples, counterexamples, and corrections",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/examples-counterexamples-and-corrections/"
+    },
+    {
+      "id": "TTC-111",
+      "title": "Visible memory and forgetting",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/visible-memory-and-forgetting/"
+    },
+    {
+      "id": "TTC-112",
+      "title": "Structured rules, YAML, and AGENTS.md",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/structured-rules-yaml-and-agents-md/"
+    },
+    {
+      "id": "TTC-113",
+      "title": "Version history and rollback",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/version-history-and-rollback/"
+    },
+    {
+      "id": "TTC-114",
+      "title": "Creative collaboration",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/creative-collaboration/"
+    },
+    {
+      "id": "TTC-115",
+      "title": "Workplace task design",
+      "level": "practitioner",
+      "canonical_url": "https://teachthecompany.com/school/workplace-task-design/"
+    },
+    {
+      "id": "TTC-116",
+      "title": "Least privilege and prompt injection",
+      "level": "advanced",
+      "canonical_url": "https://teachthecompany.com/school/least-privilege-and-prompt-injection/"
+    },
+    {
+      "id": "TTC-117",
+      "title": "Evaluations and regression tests",
+      "level": "advanced",
+      "canonical_url": "https://teachthecompany.com/school/evaluations-and-regression-tests/"
+    },
+    {
+      "id": "TTC-118",
+      "title": "Context, retrieval, visible memory, and model-weight fine-tuning",
+      "level": "advanced",
+      "canonical_url": "https://teachthecompany.com/school/context-retrieval-memory-and-fine-tuning/"
+    },
+    {
+      "id": "TTC-119",
+      "title": "Responsible deployment and accountability",
+      "level": "advanced",
+      "canonical_url": "https://teachthecompany.com/school/responsible-deployment-and-accountability/"
+    },
+    {
+      "id": "TTC-120",
+      "title": "Portable and self-hosted AI workflows",
+      "level": "advanced",
+      "canonical_url": "https://teachthecompany.com/school/portable-and-self-hosted-ai-workflows/"
+    }
+  ]
+}

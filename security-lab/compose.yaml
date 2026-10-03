@@ -1,0 +1,98 @@
+version: "2.4"
+
+services:
+  lab:
+    image: ${TTC_SECURITY_LAB_IMAGE:-local/teach-security-lab:0.1.0}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SECURITY_LAB_ALLOWED_HOSTS: 127.0.0.1,localhost,security.teachthecompany.com
+      SECURITY_LAB_ORIGIN: https://security.teachthecompany.com
+      SECURITY_LAB_DATABASE: /var/lib/security-lab/receipts.sqlite3
+    command: ["gunicorn", "security_lab.application:application", "--bind", "unix:/var/lib/security-lab-socket/lab.sock", "--workers", "2", "--threads", "2", "--timeout", "20", "--access-logfile", "-", "--error-logfile", "-"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(socket.AF_UNIX); s.settimeout(3); s.connect('/var/lib/security-lab-socket/lab.sock'); s.sendall(b'GET /healthz/ HTTP/1.0\\r\\nHost: 127.0.0.1\\r\\n\\r\\n'); assert b'200 OK' in s.recv(1024)"]
+      interval: 10s
+      timeout: 4s
+      retries: 12
+      start_period: 10s
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 96
+    mem_limit: 192m
+    cpus: 0.5
+    stop_grace_period: 15s
+    volumes:
+      - security_lab_state:/var/lib/security-lab
+      - security_lab_socket:/var/lib/security-lab-socket
+    networks:
+      - lab_internal
+    logging:
+      driver: json-file
+      options:
+        max-size: 2m
+        max-file: "2"
+
+  preview:
+    image: ${TTC_SECURITY_LAB_IMAGE:-local/teach-security-lab:0.1.0}
+    depends_on:
+      lab:
+        condition: service_healthy
+    entrypoint: []
+    command: ["python", "-m", "security_lab.preview_proxy"]
+    environment:
+      SECURITY_LAB_PREVIEW_PORT: "8080"
+      SECURITY_LAB_PREVIEW_TARGET: lab
+      SECURITY_LAB_PREVIEW_TARGET_PORT: "8000"
+      SECURITY_LAB_PREVIEW_SOCKET: /var/lib/security-lab-socket/lab.sock
+    ports:
+      - "127.0.0.1:${TTC_SECURITY_LAB_PORT:-18575}:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz/', timeout=3).read()"]
+      interval: 10s
+      timeout: 4s
+      retries: 12
+      start_period: 10s
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 64m
+    cpus: 0.25
+    stop_grace_period: 10s
+    networks:
+      - preview_bridge
+    volumes:
+      - security_lab_socket:/var/lib/security-lab-socket
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: "2"
+
+volumes:
+  security_lab_state:
+  security_lab_socket:
+
+networks:
+  lab_internal:
+    internal: true
+    ipam:
+      config:
+        - subnet: ${TTC_SECURITY_LAB_INTERNAL_SUBNET:-172.31.112.0/29}
+  preview_bridge:
+    ipam:
+      config:
+        - subnet: ${TTC_SECURITY_LAB_PREVIEW_SUBNET:-172.31.113.0/29}
