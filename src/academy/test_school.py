@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from io import StringIO
 from urllib.parse import parse_qs, urlparse
 from unittest.mock import patch
@@ -14,6 +15,7 @@ from .composer import compose, expand_prerequisites
 from .ingestion import PublicTextSnapshot
 from .models import KnowledgeReview, PublicInputEvent, PublicSuggestion, TrustedKnowledgeSource
 from .manual_content import MANUALS
+from .project_library import PUBLISHED_PROJECTS, PROJECTS, published_projects, validate_project_library
 from .school_content import CANONICAL_GUIDE_ALIASES, LESSONS, LESSON_BY_ID
 from config.fetch_proxy import FetchError, fetch as safe_proxy_fetch
 
@@ -111,6 +113,138 @@ class PublicManualTests(TestCase):
         self.assertContains(response, "dedicated Teach manuals repository")
         self.assertContains(response, "complete Apache-2.0 application and Docker source")
         self.assertContains(response, "linked from the self-host page")
+
+
+class MicrocontrollerProjectLibraryTests(TestCase):
+    def test_authoritative_manifest_is_valid_and_drafts_fail_closed(self):
+        validate_project_library(PROJECTS)
+        self.assertEqual(len(PUBLISHED_PROJECTS), 1)
+        draft = replace(PUBLISHED_PROJECTS[0], project_id="TTC-MCU-DRAFT", slug="private-draft", publication_status="draft")
+        self.assertEqual(published_projects((draft,)), ())
+
+    def test_project_and_every_public_format_render_from_same_record(self):
+        item = PUBLISHED_PROJECTS[0]
+        index = self.client.get(reverse("academy:projects"))
+        markdown_index = self.client.get(reverse("academy:project_index", kwargs={"format": "md"}))
+        json_index = self.client.get(reverse("academy:project_index", kwargs={"format": "json"}))
+        html = self.client.get(reverse("academy:project", kwargs={"slug": item.slug}))
+        markdown = self.client.get(reverse("academy:project_format", kwargs={"slug": item.slug, "format": "md"}))
+        payload = self.client.get(reverse("academy:project_format", kwargs={"slug": item.slug, "format": "json"}))
+        prompt = self.client.get(reverse("academy:project_prompt", kwargs={"slug": item.slug}))
+        self.assertEqual(
+            tuple(response.status_code for response in (index, markdown_index, json_index, html, markdown, payload, prompt)),
+            (200, 200, 200, 200, 200, 200, 200),
+        )
+        self.assertContains(index, item.title)
+        self.assertContains(html, item.outcome)
+        self.assertIn(item.project_id, markdown.content.decode())
+        self.assertEqual(json_index.json()["projects"][0]["slug"], item.slug)
+        self.assertEqual(payload.json()["finished_prompt"], item.finished_prompt)
+        self.assertEqual(prompt.content.decode().strip(), item.finished_prompt)
+        self.assertIn("attachment;", prompt["Content-Disposition"])
+
+    def test_prompt_requires_confirmation_and_separates_verification_states(self):
+        item = PUBLISHED_PROJECTS[0]
+        prompt = item.finished_prompt
+        for required in (
+            "Exact development board",
+            "Exact sensor",
+            "Toolchain and exact version",
+            "actual proposed connection",
+            "Power source",
+            "Intended behavior",
+            "Reply YES",
+            "Do not continue until I confirm YES",
+        ):
+            self.assertIn(required, prompt)
+        payload = self.client.get(
+            reverse("academy:project_format", kwargs={"slug": item.slug, "format": "json"})
+        ).json()
+        self.assertEqual(
+            set(payload["verification"]),
+            {"prompt_review", "build", "upload", "wiring", "physical_test"},
+        )
+        self.assertEqual(payload["verification"]["physical_test"], "not-hardware-verified")
+        self.assertEqual(payload["verification_labels"]["physical_test"], "Not hardware-verified")
+        self.assertIsNone(payload["video"])
+        confirmation_gate = prompt.index("Ask: “Is this exact pin, power and build map correct?")
+        final_wiring = prompt.index("Final wiring table")
+        source_code = prompt.index("Complete minimal source code")
+        self.assertLess(confirmation_gate, final_wiring)
+        self.assertLess(confirmation_gate, source_code)
+
+    def test_project_schema_is_factual_and_omits_nonexistent_video(self):
+        item = PUBLISHED_PROJECTS[0]
+        response = self.client.get(reverse("academy:project", kwargs={"slug": item.slug}))
+        content = response.content.decode()
+        self.assertIn('"@type":"WebPage"', content)
+        self.assertIn('"@type":"CreativeWork"', content)
+        self.assertIn('"@type":"BreadcrumbList"', content)
+        self.assertNotIn('"@type":"VideoObject"', content)
+        self.assertContains(response, "No project video is published yet")
+        self.assertContains(response, "Not physically tested by Teach the Company")
+
+    def test_publication_propagates_to_archive_sitemap_and_llms(self):
+        item = PUBLISHED_PROJECTS[0]
+        html_index = self.client.get(reverse("academy:projects")).content.decode()
+        markdown_index = self.client.get(reverse("academy:project_index", kwargs={"format": "md"})).content.decode()
+        json_index = self.client.get(reverse("academy:project_index", kwargs={"format": "json"})).json()
+        sitemap = self.client.get(reverse("academy:sitemap")).content.decode()
+        llms = self.client.get(reverse("academy:llms_txt")).content.decode()
+        self.assertIn(item.title, html_index)
+        self.assertIn(item.title, markdown_index)
+        self.assertEqual(json_index["projects"][0]["title"], item.title)
+        self.assertIn(f"/projects/{item.slug}/", sitemap)
+        self.assertIn(f"<lastmod>{item.updated_on}</lastmod>", sitemap)
+        self.assertIn("/projects/index.json", llms)
+
+    def test_new_published_manifest_record_automatically_joins_every_public_index(self):
+        future = replace(
+            PUBLISHED_PROJECTS[0],
+            project_id="TTC-MCU-002",
+            slug="future-published-fixture",
+            title="Future published fixture",
+            updated_on="2026-10-05",
+        )
+        project_set = (*PUBLISHED_PROJECTS, future)
+        with patch("academy.views.PUBLISHED_PROJECTS", project_set), patch(
+            "academy.views.PUBLISHED_PROJECT_BY_SLUG",
+            {item.slug: item for item in project_set},
+        ):
+            html_index = self.client.get(reverse("academy:projects")).content.decode()
+            json_index = self.client.get(reverse("academy:project_index", kwargs={"format": "json"})).json()
+            sitemap = self.client.get(reverse("academy:sitemap")).content.decode()
+            detail = self.client.get(reverse("academy:project", kwargs={"slug": future.slug}))
+        self.assertIn(future.title, html_index)
+        self.assertIn(future.title, {item["title"] for item in json_index["projects"]})
+        self.assertIn(f"/projects/{future.slug}/", sitemap)
+        self.assertIn("<lastmod>2026-10-05</lastmod>", sitemap)
+        self.assertContains(detail, future.title)
+
+    def test_public_project_outputs_exclude_private_infrastructure_markers(self):
+        item = PUBLISHED_PROJECTS[0]
+        surfaces = (
+            self.client.get(reverse("academy:projects")).content.decode(),
+            self.client.get(reverse("academy:project_format", kwargs={"slug": item.slug, "format": "md"})).content.decode(),
+            self.client.get(reverse("academy:project_format", kwargs={"slug": item.slug, "format": "json"})).content.decode(),
+        )
+        combined = "\n".join(surfaces)
+        self.assertNotRegex(combined, r"\b(?:CT|VM)\d{2,3}\b")
+        self.assertNotRegex(combined, r"/(?:srv|var/backups)/")
+        self.assertNotIn("receipt_id", combined)
+
+    def test_unknown_and_draft_project_routes_fail_closed_without_sessions(self):
+        item = PUBLISHED_PROJECTS[0]
+        for route in (
+            reverse("academy:projects"),
+            reverse("academy:project", kwargs={"slug": item.slug}),
+            reverse("academy:project_format", kwargs={"slug": item.slug, "format": "json"}),
+        ):
+            response = self.client.get(route)
+            self.assertNotIn("Set-Cookie", response.headers)
+        self.assertEqual(self.client.get("/projects/missing-project/").status_code, 404)
+        self.assertEqual(self.client.get("/projects/missing-project.json").status_code, 404)
+        self.assertEqual(self.client.get("/projects/private-draft/").status_code, 404)
 
 
 class CompositionTests(TestCase):

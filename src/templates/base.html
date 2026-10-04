@@ -30,8 +30,8 @@
   <link rel="mask-icon" href="{% static 'img/favicon.svg' %}" color="#163d35">
   <link rel="manifest" href="{% url 'academy:site_manifest' %}">
   <meta name="apple-mobile-web-app-title" content="Teach">
-  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=20261003-1">
-  <script src="{% static 'js/site.js' %}?v=20261003-1" defer></script>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=20261004-1">
+  <script src="{% static 'js/site.js' %}?v=20261004-1" defer></script>
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"{{ public_site_origin }}/#organization","name":"Teach the Company","url":"{{ public_site_origin }}/"},{"@type":"WebSite","@id":"{{ public_site_origin }}/#website","name":"Teach the Company","url":"{{ public_site_origin }}/","publisher":{"@id":"{{ public_site_origin }}/#organization"},"inLanguage":"en"}]}</script>
   {% block structured_data %}{% endblock %}
 </head>
@@ -46,6 +46,7 @@
       <nav aria-label="Main navigation">
         {% if not is_agent_host %}<a href="{% url 'academy:school' %}">School</a>
         <a href="{% url 'academy:manuals' %}">Manuals</a>
+        <a href="{% url 'academy:projects' %}">Projects</a>
         <a href="{% url 'academy:compose' %}">Build a pack</a>
         <a href="{% url 'academy:demos' %}">Proof</a>
         <a href="{{ security_lab_url }}">Security</a>
@@ -77,6 +78,7 @@
           <a href="{% url 'academy:demos' %}">Demo agents</a>
           <a href="{% url 'academy:school' %}">AI school</a>
           <a href="{% url 'academy:manuals' %}">Public manuals</a>
+          <a href="{% url 'academy:projects' %}">Microcontroller projects</a>
           <a href="{% url 'academy:suggest' %}">Suggest a correction</a>
           <a href="{% url 'academy:self_host' %}">Docker self-hosting</a>
           <a href="{% url 'academy:principles' %}">Privacy &amp; rules</a>

@@ -131,17 +131,25 @@
     button.addEventListener("click", async () => {
       const target = document.getElementById(button.dataset.copyTarget);
       if (!target) return;
+      const status = button.getAttribute("aria-describedby")
+        ? document.getElementById(button.getAttribute("aria-describedby"))
+        : null;
       try {
         await navigator.clipboard.writeText(target.textContent);
         const original = button.textContent;
         button.textContent = "Copied ✓";
-        window.setTimeout(() => { button.textContent = original; }, 1800);
+        if (status) status.textContent = "Prompt copied to the clipboard.";
+        window.setTimeout(() => {
+          button.textContent = original;
+          if (status) status.textContent = "";
+        }, 1800);
       } catch (_) {
         const selection = window.getSelection();
         const range = document.createRange();
         range.selectNodeContents(target);
         selection.removeAllRanges();
         selection.addRange(range);
+        if (status) status.textContent = "Clipboard access was unavailable. The prompt is selected for manual copy.";
       }
     });
   });

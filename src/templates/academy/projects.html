@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Microcontroller Project Library — Teach the Company{% endblock %}
+{% block meta_description %}Finished microcontroller prompts with hardware boundaries, wiring status, reproducible steps and honest build, upload and physical-test evidence.{% endblock %}
+{% block og_title %}Microcontroller Project Library — Teach the Company{% endblock %}
+{% block og_description %}Copy a finished hardware prompt, confirm the exact board and wiring first, and keep reference review, build, upload and physical testing separate.{% endblock %}
+{% block structured_data %}<script type="application/ld+json">{{ structured_data|safe }}</script>{% endblock %}
+{% block body_class %}projects-page{% endblock %}
+{% block content %}
+<section class="page-hero board-page-hero project-library-hero">
+  <div class="shell page-hero-grid">
+    <div><span class="eyebrow lime">Open project library · {{ projects|length }} published</span><h1>Confirm the hardware.<br><em>Then write the code.</em></h1><p>Finished prompts, exact electrical questions and visible verification states. Copy them without an account; adapt them only after the real board, pins and power are confirmed.</p><div class="button-row"><a class="button button-lime" href="{% url 'academy:project_index' format='md' %}">Markdown archive <span>↗</span></a><a class="light-link text-link" href="{% url 'academy:project_index' format='json' %}">JSON archive <span>↗</span></a></div></div>
+    <div class="hero-syllabus-card"><span>PUBLICATION CONTRACT</span><strong>Finished prompts only.</strong><strong>Draft preparation stays private.</strong><strong>Build, upload and physical tests never collapse into one claim.</strong><small>HTML · Markdown · JSON · TXT</small></div>
+  </div>
+</section>
+<section class="section paper-section">
+  <div class="shell">
+    <div class="section-heading"><div><span class="eyebrow blue">Microcontroller classroom</span><h2>Start from evidence,<br><em>not a guessed pin.</em></h2></div><p>Every entry begins with the outcome and exposes its current limits. A reference-reviewed diagram is not presented as a completed physical build.</p></div>
+    <div class="project-card-grid">
+      {% for project in projects %}<article class="project-card"><div class="project-card-top"><span>{{ project.id }}</span><i>Prompt v{{ project.prompt_version }}</i></div><h2><a href="{% url 'academy:project' slug=project.slug %}">{{ project.title }}</a></h2><p>{{ project.outcome }}</p><dl class="project-status-mini"><div><dt>Wiring</dt><dd>{{ project.verification_labels.wiring }}</dd></div><div><dt>Build</dt><dd>{{ project.verification_labels.build }}</dd></div><div><dt>Physical</dt><dd>{{ project.verification_labels.physical_test }}</dd></div></dl><a class="project-open" href="{% url 'academy:project' slug=project.slug %}">Open project and prompt <b>→</b></a></article>{% empty %}<p>No project has passed the publication gate yet.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section project-method-band"><div class="shell split-heading"><div><span class="eyebrow lime">What this proves</span><h2>Reusable process.<br><em>Honest status.</em></h2></div><div><p>The same authoritative project record creates the readable page, Markdown, JSON, prompt download, archive entry and sitemap record. Publishing a future accepted entry adds it to each surface automatically.</p><p>Search engines and AI systems decide when to crawl or cite it. Publication makes the evidence discoverable; it does not promise indexing or ranking.</p></div></div></section>
+{% endblock %}

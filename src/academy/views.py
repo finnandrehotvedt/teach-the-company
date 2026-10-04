@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import secrets
 from datetime import timedelta
 from urllib.parse import urlencode
@@ -59,6 +60,7 @@ from .public_content import GUIDES
 from .composer import PRESETS, compose
 from .school_content import LESSONS, LESSON_BY_ID, LESSON_BY_SLUG
 from .manual_content import MANUALS, MANUAL_BY_SLUG
+from .project_library import PUBLISHED_PROJECTS, PUBLISHED_PROJECT_BY_SLUG
 
 
 @require_GET
@@ -1106,6 +1108,328 @@ def manual_index(request, format):
     return HttpResponse("\n".join(lines), content_type="text/markdown; charset=utf-8")
 
 
+def _project_payload(item):
+    return {
+        "id": item.project_id,
+        "slug": item.slug,
+        "title": item.title,
+        "outcome": item.outcome,
+        "summary": item.summary,
+        "publication_status": item.publication_status,
+        "published_on": item.published_on,
+        "updated_on": item.updated_on,
+        "author": item.author,
+        "language": item.language,
+        "board": item.board,
+        "board_revision": item.board_revision,
+        "toolchain": item.toolchain,
+        "logic_level": item.logic_level,
+        "power_requirement": item.power_requirement,
+        "hardware": [
+            {
+                "quantity": part.quantity,
+                "item": part.item,
+                "model": part.model,
+                "revision": part.revision,
+                "purpose": part.purpose,
+            }
+            for part in item.hardware
+        ],
+        "wiring": [
+            {
+                "board_pin": wire.board_pin,
+                "module_pin": wire.module_pin,
+                "signal": wire.signal,
+                "electrical_note": wire.electrical_note,
+            }
+            for wire in item.wiring
+        ],
+        "wiring_diagram_alt": item.wiring_diagram_alt,
+        "wiring_note": item.wiring_note,
+        "prompt_version": item.prompt_version,
+        "prompt_sha256": hashlib.sha256(item.finished_prompt.encode("utf-8")).hexdigest(),
+        "finished_prompt": item.finished_prompt,
+        "usage_steps": list(item.usage_steps),
+        "observed_results": list(item.observed_results),
+        "limitations": list(item.limitations),
+        "related_lesson_ids": list(item.related_lesson_ids),
+        "references": [
+            {"label": reference.label, "url": reference.url, "scope": reference.scope}
+            for reference in item.references
+        ],
+        "verification": {
+            "prompt_review": item.verification.prompt_review,
+            "build": item.verification.build,
+            "upload": item.verification.upload,
+            "wiring": item.verification.wiring,
+            "physical_test": item.verification.physical_test,
+        },
+        "verification_labels": {
+            "prompt_review": "Editorially reviewed",
+            "build": "Not tested" if item.verification.build == "not-tested" else item.verification.build,
+            "upload": "Not observed" if item.verification.upload == "not-tested" else item.verification.upload,
+            "wiring": "Reference-reviewed; not hardware-verified" if item.verification.wiring == "reference-reviewed" else item.verification.wiring,
+            "physical_test": "Not hardware-verified" if item.verification.physical_test == "not-hardware-verified" else item.verification.physical_test,
+        },
+        "video": (
+            {
+                "name": item.video.name,
+                "url": item.video.url,
+                "thumbnail_url": item.video.thumbnail_url,
+                "upload_date": item.video.upload_date,
+                "duration": item.video.duration,
+                "transcript": item.video.transcript,
+            }
+            if item.video
+            else None
+        ),
+    }
+
+
+def _project_markdown(payload):
+    verification = payload["verification"]
+    labels = payload["verification_labels"]
+    lines = [
+        f"# {payload['id']} — {payload['title']}",
+        "",
+        payload["outcome"],
+        "",
+        payload["summary"],
+        "",
+        f"Published: {payload['published_on']} · Updated: {payload['updated_on']}",
+        f"Author: {payload['author']}",
+        "",
+        "## Verification status",
+        "",
+        f"- Finished prompt: {labels['prompt_review']}",
+        f"- Firmware build: {labels['build']}",
+        f"- Upload: {labels['upload']}",
+        f"- Wiring: {labels['wiring']}",
+        f"- Physical test: {labels['physical_test']}",
+        "",
+        "## Video",
+        "",
+    ]
+    if payload["video"]:
+        lines.append(f"[{payload['video']['name']}]({payload['video']['url']})")
+    else:
+        lines.append("No real, accessible project video is published for this entry yet.")
+    lines.extend(
+        (
+            "",
+            "## Board, toolchain and electrical boundary",
+            "",
+            f"- Board: {payload['board']}",
+            f"- Board revision: {payload['board_revision']}",
+            f"- Toolchain: {payload['toolchain']}",
+            f"- Logic level: {payload['logic_level']}",
+            f"- Power: {payload['power_requirement']}",
+            "",
+            "## Hardware / BOM",
+            "",
+            "| Qty | Item | Model | Revision | Purpose |",
+            "| --- | --- | --- | --- | --- |",
+        )
+    )
+    lines.extend(
+        f"| {part['quantity']} | {part['item']} | {part['model']} | {part['revision']} | {part['purpose']} |"
+        for part in payload["hardware"]
+    )
+    lines.extend(("", "## Wiring", "", f"**Status:** {labels['wiring']}", "", payload["wiring_note"], ""))
+    lines.extend(("| Board pin | Module pin | Signal | Electrical note |", "| --- | --- | --- | --- |"))
+    lines.extend(
+        f"| {wire['board_pin']} | {wire['module_pin']} | {wire['signal']} | {wire['electrical_note']} |"
+        for wire in payload["wiring"]
+    )
+    lines.extend(
+        (
+            "",
+            f"Diagram description: {payload['wiring_diagram_alt']}",
+            "",
+            f"## Finished prompt — version {payload['prompt_version']}",
+            "",
+            f"SHA-256: `{payload['prompt_sha256']}`",
+            "",
+            "```text",
+            payload["finished_prompt"],
+            "```",
+            "",
+            "## How to use it",
+            "",
+        )
+    )
+    lines.extend(f"{index}. {step}" for index, step in enumerate(payload["usage_steps"], 1))
+    lines.extend(("", "## Actual results", ""))
+    lines.extend(f"- {result}" for result in payload["observed_results"])
+    lines.extend(("", "## Limits", ""))
+    lines.extend(f"- {limit}" for limit in payload["limitations"])
+    lines.extend(("", "## Sources and evidence", ""))
+    lines.extend(f"- [{reference['label']}]({reference['url']}) — {reference['scope']}" for reference in payload["references"])
+    lines.extend(
+        (
+            "",
+            f"Related lessons: {', '.join(payload['related_lesson_ids'])}",
+            "",
+            f"Canonical URL: {settings.PUBLIC_SITE_ORIGIN}/projects/{payload['slug']}/",
+            f"Machine-readable JSON: {settings.PUBLIC_SITE_ORIGIN}/projects/{payload['slug']}.json",
+        )
+    )
+    return "\n".join(lines)
+
+
+@require_GET
+def projects(request):
+    project_rows = [_project_payload(item) for item in PUBLISHED_PROJECTS]
+    structured_data = json.dumps(
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "CollectionPage",
+                    "name": "Microcontroller Project Library",
+                    "description": "Finished prompts, exact hardware boundaries, wiring status and honest test evidence for adaptable microcontroller projects.",
+                    "url": settings.PUBLIC_SITE_ORIGIN + "/projects/",
+                    "isAccessibleForFree": True,
+                },
+                {
+                    "@type": "ItemList",
+                    "numberOfItems": len(project_rows),
+                    "itemListElement": [
+                        {
+                            "@type": "ListItem",
+                            "position": index,
+                            "name": project["title"],
+                            "url": f"{settings.PUBLIC_SITE_ORIGIN}/projects/{project['slug']}/",
+                        }
+                        for index, project in enumerate(project_rows, 1)
+                    ],
+                },
+            ],
+        },
+        separators=(",", ":"),
+    )
+    return render(
+        request,
+        "academy/projects.html",
+        {"projects": project_rows, "structured_data": structured_data},
+    )
+
+
+@require_GET
+def project(request, slug, format="html"):
+    if format not in {"html", "md", "json"}:
+        raise Http404("Project format not found.")
+    item = PUBLISHED_PROJECT_BY_SLUG.get(slug)
+    if not item:
+        raise Http404("Project not found.")
+    payload = _project_payload(item)
+    payload["canonical_url"] = f"{settings.PUBLIC_SITE_ORIGIN}/projects/{slug}/"
+    payload["prompt_download_url"] = f"{settings.PUBLIC_SITE_ORIGIN}/projects/{slug}/prompt.txt"
+    if format == "md":
+        return HttpResponse(_project_markdown(payload), content_type="text/markdown; charset=utf-8")
+    if format == "json":
+        return JsonResponse(payload)
+    lessons = [_lesson_payload(LESSON_BY_ID[lesson_id]) for lesson_id in item.related_lesson_ids if lesson_id in LESSON_BY_ID]
+    graph = [
+        {
+            "@type": "WebPage",
+            "name": payload["title"],
+            "description": payload["summary"],
+            "url": payload["canonical_url"],
+            "datePublished": payload["published_on"],
+            "dateModified": payload["updated_on"],
+            "inLanguage": payload["language"],
+        },
+        {
+            "@type": "CreativeWork",
+            "name": payload["title"],
+            "description": payload["summary"],
+            "url": payload["canonical_url"],
+            "author": {"@type": "Person", "name": payload["author"]},
+            "publisher": {"@type": "Organization", "name": "Teach the Company"},
+            "datePublished": payload["published_on"],
+            "dateModified": payload["updated_on"],
+            "isAccessibleForFree": True,
+            "learningResourceType": "finished microcontroller project prompt",
+        },
+        {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Home", "item": settings.PUBLIC_SITE_ORIGIN + "/"},
+                {"@type": "ListItem", "position": 2, "name": "Projects", "item": settings.PUBLIC_SITE_ORIGIN + "/projects/"},
+                {"@type": "ListItem", "position": 3, "name": payload["title"], "item": payload["canonical_url"]},
+            ],
+        },
+    ]
+    if payload["video"]:
+        graph.append(
+            {
+                "@type": "VideoObject",
+                "name": payload["video"]["name"],
+                "description": payload["summary"],
+                "thumbnailUrl": [payload["video"]["thumbnail_url"]],
+                "uploadDate": payload["video"]["upload_date"],
+                "duration": payload["video"]["duration"],
+                "contentUrl": payload["video"]["url"],
+                "transcript": payload["video"]["transcript"],
+            }
+        )
+    structured_data = json.dumps({"@context": "https://schema.org", "@graph": graph}, separators=(",", ":"))
+    return render(
+        request,
+        "academy/project.html",
+        {"project": payload, "lessons": lessons, "structured_data": structured_data},
+    )
+
+
+@require_GET
+def project_prompt(request, slug):
+    item = PUBLISHED_PROJECT_BY_SLUG.get(slug)
+    if not item:
+        raise Http404("Project not found.")
+    response = HttpResponse(item.finished_prompt + "\n", content_type="text/plain; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{item.slug}-prompt-v{item.prompt_version}.txt"'
+    return response
+
+
+@require_GET
+def project_index(request, format):
+    if format not in {"md", "json"}:
+        raise Http404("Project index format not found.")
+    projects_payload = [_project_payload(item) for item in PUBLISHED_PROJECTS]
+    if format == "json":
+        return JsonResponse(
+            {
+                "name": "Microcontroller Project Library",
+                "version": "1.0.0",
+                "canonical_url": settings.PUBLIC_SITE_ORIGIN + "/projects/",
+                "publication_rule": "Only published records appear. Verification states remain separate.",
+                "projects": [
+                    {
+                        **project_payload,
+                        "canonical_url": f"{settings.PUBLIC_SITE_ORIGIN}/projects/{project_payload['slug']}/",
+                        "markdown_url": f"{settings.PUBLIC_SITE_ORIGIN}/projects/{project_payload['slug']}.md",
+                        "json_url": f"{settings.PUBLIC_SITE_ORIGIN}/projects/{project_payload['slug']}.json",
+                        "prompt_download_url": f"{settings.PUBLIC_SITE_ORIGIN}/projects/{project_payload['slug']}/prompt.txt",
+                    }
+                    for project_payload in projects_payload
+                ],
+            }
+        )
+    lines = [
+        "# Microcontroller Project Library",
+        "",
+        "Finished public prompts, hardware boundaries, wiring status and test evidence. Only published records appear.",
+        "",
+    ]
+    lines.extend(
+        f"- [{project_payload['id']} — {project_payload['title']}]({settings.PUBLIC_SITE_ORIGIN}/projects/{project_payload['slug']}/) "
+        f"— physical test: {project_payload['verification']['physical_test']}; updated {project_payload['updated_on']}"
+        for project_payload in projects_payload
+    )
+    return HttpResponse("\n".join(lines), content_type="text/markdown; charset=utf-8")
+
+
 def _composition_share_url(cleaned):
     public = {
         "goal": cleaned["goal"],
@@ -1232,6 +1556,9 @@ def llms_txt(request):
         f"- Public manuals: {settings.PUBLIC_SITE_ORIGIN}/manuals/",
         f"- Manual Markdown index: {settings.PUBLIC_SITE_ORIGIN}/manuals/index.md",
         f"- Manual JSON index: {settings.PUBLIC_SITE_ORIGIN}/manuals/index.json",
+        f"- Microcontroller project library: {settings.PUBLIC_SITE_ORIGIN}/projects/",
+        f"- Project Markdown archive: {settings.PUBLIC_SITE_ORIGIN}/projects/index.md",
+        f"- Project JSON archive: {settings.PUBLIC_SITE_ORIGIN}/projects/index.json",
         f"- Build a learning pack: {settings.PUBLIC_SITE_ORIGIN}/compose/",
         f"- Editorial freshness: {settings.PUBLIC_SITE_ORIGIN}/knowledge/freshness/",
         "",
@@ -1248,6 +1575,7 @@ def sitemap(request):
         "academy:curriculum",
         "academy:school",
         "academy:manuals",
+        "academy:projects",
         "academy:compose",
         "academy:suggest",
         "academy:freshness",
@@ -1275,6 +1603,13 @@ def sitemap(request):
         ).values_list("public_slug", flat=True)
     )
     body = "".join(f"<url><loc>{xml_escape(settings.PUBLIC_SITE_ORIGIN + path)}</loc></url>" for path in paths)
+    body += "".join(
+        "<url>"
+        f"<loc>{xml_escape(settings.PUBLIC_SITE_ORIGIN + reverse('academy:project', kwargs={'slug': item.slug}))}</loc>"
+        f"<lastmod>{xml_escape(item.updated_on)}</lastmod>"
+        "</url>"
+        for item in PUBLISHED_PROJECTS
+    )
     return HttpResponse(
         f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>',
         content_type="application/xml; charset=utf-8",
